@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 
 import si.uni_lj.fe.tnuv.flatypus.R;
 import si.uni_lj.fe.tnuv.flatypus.databinding.FragmentHomeBinding;
@@ -27,6 +28,11 @@ public class HomeFragment extends Fragment {
 
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
+
+        // Settings Icon Navigation
+        binding.settingsIcon.setOnClickListener(v -> {
+            Navigation.findNavController(v).navigate(R.id.action_nav_home_to_nav_settings);
+        });
 
         // Character Image
         /*ImageView characterImage = binding.characterImage;
