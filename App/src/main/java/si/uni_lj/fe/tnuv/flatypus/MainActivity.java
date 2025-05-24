@@ -1,6 +1,7 @@
 package si.uni_lj.fe.tnuv.flatypus;
 
 import android.os.Bundle;
+import android.view.View;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -32,6 +33,15 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
+
+        // Add a listener to toggle BottomNavigationView visibility
+        navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
+            if (destination.getId() == R.id.nav_settings) {
+                navView.setVisibility(View.GONE); // Hide the bottom navigation on SettingsFragment
+            } else {
+                navView.setVisibility(View.VISIBLE); // Show it on other fragments
+            }
+        });
     }
 
 }

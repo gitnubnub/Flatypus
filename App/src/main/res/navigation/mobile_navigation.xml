@@ -28,6 +28,16 @@
         tools:layout="@layout/fragment_notifications" />
 
     <fragment
+        android:id="@+id/nav_todo"
+        android:name="si.uni_lj.fe.tnuv.flatypus.ui.to_do.ToDoFragment"
+        android:label="To-Do"
+        tools:layout="@layout/fragment_to_do">
+        <action
+            android:id="@+id/action_nav_todo_to_nav_settings"
+            app:destination="@id/nav_settings" />
+    </fragment>
+
+    <fragment
         android:id="@+id/nav_settings"
         android:name="si.uni_lj.fe.tnuv.flatypus.ui.SettingsFragment"
         android:label="Settings"

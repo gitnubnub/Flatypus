@@ -22,4 +22,8 @@
     <string name="apartments_text">Apartments</string>
     <string name="apartment_code_text">Apartment code:</string>
     <string name="leave_apartment_text">LEAVE APARTMENT</string>
+    <string name="add_task_text">ADD TASK</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="to_do_text">To-Do</string>
 </resources>
