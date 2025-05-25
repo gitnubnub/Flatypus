@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Task Name -->
+    <EditText
+        android:id="@+id/task_name_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Task Name"
+        android:inputType="text"
+        android:background="@drawable/edittext_background"
+        android:padding="8dp"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Assignee Spinner -->
+    <Spinner
+        android:id="@+id/assignee_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Repeat Spinner -->
+    <Spinner
+        android:id="@+id/repeat_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Add Task Button -->
+    <Button
+        android:id="@+id/add_task_confirm_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="ADD TASK"
+        android:background="@drawable/button_background"
+        android:textColor="#4A2C2A" />
+
+</LinearLayout>

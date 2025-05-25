@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/yellow_green"> <!-- Light green background from Figma -->
+
+    <!-- Adjusted margin -->
+
+    <!-- Proper constraints to center -->
+
+    <ImageButton
+        android:id="@+id/back_button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_margin="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="88dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_back"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/profile_picture"
+        android:layout_width="185dp"
+        android:layout_height="179dp"
+        android:layout_marginTop="28dp"
+        android:adjustViewBounds="true"
+        android:src="@drawable/platypus"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.463"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/username_input" />
+
+    <EditText
+        android:id="@+id/username_input"
+        android:layout_width="271dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="148dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/edittext_background"
+        android:hint="Username"
+        android:padding="8dp"
+        android:textColor="#4A2C2A"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@id/back_button"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/change_picture_button"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_edit"
+        app:layout_constraintEnd_toEndOf="@id/profile_picture"
+        app:layout_constraintTop_toTopOf="@id/profile_picture"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="4dp" />
+
+    <Switch
+        android:id="@+id/notifications_toggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="24dp"
+        android:text="@string/notifications_text"
+        android:textColor="#4A2C2A"
+        app:layout_constraintStart_toStartOf="@id/profile_picture"
+        app:layout_constraintTop_toBottomOf="@id/profile_picture"
+        tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+    <Button
+        android:id="@+id/apartments_button"
+        android:layout_width="168dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/button_background"
+        android:text="@string/apartments_text"
+        android:textColor="#4A2C2A"
+        app:layout_constraintEnd_toEndOf="@id/profile_picture"
+        app:layout_constraintStart_toStartOf="@id/profile_picture"
+        app:layout_constraintTop_toBottomOf="@id/notifications_toggle" />
+
+    <TextView
+        android:id="@+id/apartment_code_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="56dp"
+        android:text="@string/apartment_code_text"
+        android:textColor="#4A2C2A"
+        app:layout_constraintStart_toStartOf="@id/apartments_button"
+        app:layout_constraintTop_toBottomOf="@id/apartments_button" />
+
+    <TextView
+        android:id="@+id/apartment_code"
+        android:layout_width="173dp"
+        android:layout_height="59dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/edittext_background"
+        android:lineSpacingExtra="12sp"
+        android:padding="8dp"
+        android:text="XDSYI"
+        android:textAlignment="center"
+        android:textColor="#4A2C2A"
+        android:textSize="34sp"
+        app:layout_constraintEnd_toEndOf="@id/apartment_code_label"
+        app:layout_constraintHorizontal_bias="0.4"
+        app:layout_constraintStart_toStartOf="@id/apartment_code_label"
+        app:layout_constraintTop_toBottomOf="@id/apartment_code_label" />
+
+    <ImageButton
+        android:id="@+id/copy_code_button"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_copy"
+        app:layout_constraintEnd_toEndOf="@id/apartment_code"
+        app:layout_constraintTop_toTopOf="@id/apartment_code"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="4dp" />
+
+    <Button
+        android:id="@+id/leave_apartment_button"
+        android:layout_width="239dp"
+        android:layout_height="42dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/redbutton_background"
+        android:text="@string/leave_apartment_text"
+        android:textColor="#FFFFFF"
+        app:layout_constraintEnd_toEndOf="@id/apartments_button"
+        app:layout_constraintHorizontal_bias="0.394"
+        app:layout_constraintStart_toStartOf="@id/apartments_button"
+        app:layout_constraintTop_toBottomOf="@id/apartment_code" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
