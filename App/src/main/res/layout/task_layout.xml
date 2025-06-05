@@ -3,46 +3,43 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
     android:padding="8dp">
 
-
     <!-- Profile Picture -->
-    <ImageView
-        android:id="@+id/assignee_profile_picture"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:src="@drawable/platypus"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginStart="8dp" />
+<ImageView
+android:id="@+id/assignee_profile_picture"
+android:layout_width="40dp"
+android:layout_height="40dp"
+android:src="@drawable/platypus"
+app:layout_constraintStart_toStartOf="parent"
+app:layout_constraintTop_toTopOf="parent"
+app:layout_constraintBottom_toBottomOf="parent"
+android:layout_marginStart="8dp" />
 
     <!-- Task Name -->
+<TextView
+android:id="@+id/task_name"
+android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="8dp"
+    android:text="Task Name"
+    android:textColor="#4A2C2A"
+    android:textSize="16sp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toStartOf="@id/task_checkbox"
+    app:layout_constraintStart_toEndOf="@id/assignee_profile_picture"
+    app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Checkbox -->
-    <TextView
-        android:id="@+id/task_name"
-        android:layout_width="277dp"
-        android:layout_height="25dp"
-        android:layout_marginStart="8dp"
-        android:text="Task Name"
-        android:textColor="#4A2C2A"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.048"
-        app:layout_constraintStart_toEndOf="@id/assignee_profile_picture"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.521" />
+<CheckBox
+android:id="@+id/task_checkbox"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_marginStart="12dp"
+app:layout_constraintBottom_toBottomOf="parent"
+app:layout_constraintEnd_toEndOf="parent"
+app:layout_constraintTop_toTopOf="parent" />
 
-    <CheckBox
-        android:id="@+id/task_checkbox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/task_name"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>

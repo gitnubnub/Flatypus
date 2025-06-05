@@ -38,17 +38,6 @@ public class ToDoFragment extends Fragment {
         binding = FragmentToDoBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        // Settings Icon Navigation
-        binding.settingsIcon.setOnClickListener(v -> {
-            Navigation.findNavController(v).navigate(R.id.action_nav_home_to_nav_settings);
-        });
-
-        // Notification Count
-        TextView notificationCount = binding.notificationCount;
-        toDoViewModel.getNotificationCount().observe(getViewLifecycleOwner(), count -> {
-            notificationCount.setText(count > 99 ? "99+" : String.valueOf(count));
-        });
-
         // To-Do List
         LinearLayout todoListContainer = binding.todoListContainer;
         toDoViewModel.getTasks().observe(getViewLifecycleOwner(), tasks -> {

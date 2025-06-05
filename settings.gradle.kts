@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Flatypus"
 include(":app")
+//include(":rajawali")

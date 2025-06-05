@@ -4,55 +4,49 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5E5C9"
-    android:padding="16dp">
+    android:background="#F5E5C9">
 
-    <!-- Settings Icon -->
-    <ImageButton
-        android:id="@+id/settings_icon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:src="@drawable/ic_settings"
-        android:background="?attr/selectableItemBackgroundBorderless"
+    <!-- Green Arch Background -->
+    <View
+        android:id="@+id/green_arch"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:background="@drawable/green_arch"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Notification Icon and Count -->
-    <ImageView
-        android:id="@+id/notification_icon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:src="@drawable/ic_notifications_black_24dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/notification_count"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/ic_notifications_black_24dp"
-        android:text="99+"
-        android:textColor="#FFFFFF"
-        android:textSize="12sp"
-        app:layout_constraintEnd_toEndOf="@id/notification_icon"
-        app:layout_constraintTop_toTopOf="@id/notification_icon" />
+    <!-- Text Inside the Arch -->
 
     <!-- To-Do List Container -->
 
-    <!-- Add Task Button -->
+    <TextView
+        android:id="@+id/arch_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="To-Do List"
+        android:textColor="#FFFFFF"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@id/green_arch"
+        app:layout_constraintStart_toStartOf="@id/green_arch"
+        app:layout_constraintTop_toTopOf="@id/green_arch" />
 
     <LinearLayout
         android:id="@+id/todo_list_container"
-        android:layout_width="404dp"
-        android:layout_height="508dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@id/green_arch"
         app:layout_constraintBottom_toTopOf="@id/add_task_button"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/notification_icon"
-        app:layout_constraintVertical_bias="0.942" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- Add Task Button -->
     <Button
         android:id="@+id/add_task_button"
         android:layout_width="0dp"
@@ -63,6 +57,10 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

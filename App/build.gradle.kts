@@ -61,7 +61,8 @@ dependencies {
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
     implementation(libs.preference)
-    implementation(libs.cardview) // This is fine
+    implementation(libs.cardview)
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
