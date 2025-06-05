@@ -8,14 +8,6 @@
 
     <!-- Top bar with settings and notification-->
     <!--Need to change drawable to settings icon-->
-    <ImageView
-        android:id="@+id/settings_icon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:src="@drawable/ic_settings"
-        android:layout_margin="20dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Need to change drawable to appropriate bell icon-->
     <ImageView
@@ -28,6 +20,42 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Need to change drawable to notification badge (the red one)-->
+
+    <!-- Anchor point for hearts (to position them below the notification icon) -->
+    <!-- Character -->
+    <!-- This will turn into a 3D model-->
+
+    <ImageView
+        android:id="@+id/character_image"
+        android:layout_width="355dp"
+        android:layout_height="416dp"
+        android:layout_marginTop="64dp"
+        android:src="@drawable/platypus"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/hearts_anchor" />
+
+    <ImageView
+        android:id="@+id/settings_icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_margin="20dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="2dp"
+        android:src="@drawable/ic_settings"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/hearts_anchor"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/notification_icon" />
+
     <TextView
         android:id="@+id/notification_count"
         android:layout_width="wrap_content"
@@ -38,31 +66,6 @@
         android:textSize="12sp"
         app:layout_constraintEnd_toEndOf="@id/notification_icon"
         app:layout_constraintTop_toTopOf="@id/notification_icon" />
-
-    <!-- Anchor point for hearts (to position them below the notification icon) -->
-    <!-- Character -->
-    <!-- This will turn into a 3D model-->
-
-    <View
-        android:id="@+id/hearts_anchor"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="44dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/notification_icon" />
-
-    <ImageView
-        android:id="@+id/character_image"
-        android:layout_width="355dp"
-        android:layout_height="416dp"
-        android:layout_marginTop="88dp"
-        android:src="@drawable/platypus"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.505"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/hearts_anchor" />
     <!--app:layout_constraintBottom_toTopOf="@id/buttons_container"-->
 
     <!-- Bottom buttons -->
