@@ -30,16 +30,18 @@ public class ShoppingListViewModel extends ViewModel {
 
     public void addItem(String itemName) {
         List<ShoppingItem> currentItems = shoppingItems.getValue();
-        if (currentItems != null) {
-            currentItems.add(new ShoppingItem(itemName, false));
-            shoppingItems.setValue(currentItems);
+        if (currentItems == null) {
+            currentItems = new ArrayList<>();
         }
+
+        currentItems.add(new ShoppingItem(itemName, false));
+        shoppingItems.setValue(currentItems);
     }
 
     public void toggleItem(int position) {
         List<ShoppingItem> currentItems = shoppingItems.getValue();
         if (currentItems != null && position >= 0 && position < currentItems.size()) {
-            currentItems.get(position).setChecked(!currentItems.get(position).isChecked());
+            currentItems.remove(position);
             shoppingItems.setValue(currentItems);
         }
     }

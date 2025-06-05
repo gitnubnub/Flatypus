@@ -110,7 +110,7 @@ public class ShoppingListFragment extends Fragment {
                 viewModel.addItem(itemName);
                 dialog.dismiss();
             } else {
-                itemNameInput.setError("Task name cannot be empty");
+                itemNameInput.setError("Item name cannot be empty");
             }
         });
     }
