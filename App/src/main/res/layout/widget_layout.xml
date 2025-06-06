@@ -2,17 +2,46 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/wheat"
-    android:padding="10sp">
+    android:background="#F5E5C9"
+    android:padding="8dp">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Click"
-        android:textSize="18sp"
-        android:fontFamily="sans-serif"
-        android:gravity="center"
-        android:id="@+id/openApplication">
+    <!-- Container for Heart and Count -->
+    <LinearLayout
+        android:id="@+id/heart_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:orientation="horizontal">
 
-    </TextView>
+        <!-- Single Heart Icon -->
+        <ImageView
+            android:id="@+id/heart_icon"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="4dp"
+            android:src="@drawable/heart_full" />
+
+        <!-- Heart Count -->
+        <TextView
+            android:id="@+id/heart_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textColor="#4A2C2A"
+            android:textSize="30sp" />
+    </LinearLayout>
+
+    <!-- Character Image (Platypus) -->
+    <ImageView
+        android:id="@+id/openApplication"
+        android:layout_width="281dp"
+        android:layout_height="453dp"
+        android:layout_centerInParent="true"
+        android:src="@drawable/platypus" />
+
+
+
 </RelativeLayout>

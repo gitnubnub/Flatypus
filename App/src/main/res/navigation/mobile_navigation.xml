@@ -47,7 +47,7 @@
 
     <fragment
         android:id="@+id/nav_settings"
-        android:name="si.uni_lj.fe.tnuv.flatypus.ui.SettingsFragment"
+        android:name="si.uni_lj.fe.tnuv.flatypus.ui.settings.SettingsFragment"
         android:label="Settings"
         tools:layout="@layout/fragment_settings">
         <action
@@ -74,7 +74,7 @@
 
     <fragment
         android:id="@+id/nav_settings"
-        android:name="si.uni_lj.fe.tnuv.flatypus.ui.SettingsFragment"
+        android:name="si.uni_lj.fe.tnuv.flatypus.ui.settings.SettingsFragment"
         android:label="Settings"
         tools:layout="@layout/fragment_settings">
         <action
