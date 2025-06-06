@@ -10,19 +10,19 @@ import java.util.List;
 public class ExpensesViewModel extends ViewModel {
 
     public static class Expense {
-        private double amount;
+        private float amount;
         private String owes;
         private String isOwed;
         private String profilePicture;
 
-        public Expense(double amount, String owes, String isOwed, String profilePicture) {
+        public Expense(float amount, String owes, String isOwed, String profilePicture) {
             this.amount = amount;
             this.owes = owes;
             this.isOwed = isOwed;
             this.profilePicture = profilePicture;
         }
 
-        public double getAmount() {
+        public float getAmount() {
             return amount;
         }
         public String getIsOwed() {
@@ -64,8 +64,8 @@ public class ExpensesViewModel extends ViewModel {
         roommates.setValue(initialRoommates);
 
         List<Expense> initialExpenses = new ArrayList<>();
-        initialExpenses.add(new Expense(15.46, "Eva", "Urška", "platypus"));
-        initialExpenses.add(new Expense(25.30, "Ari", "Eva", "red_fluffy"));
+        initialExpenses.add(new Expense(15.46F, "Eva", "Urška", "platypus"));
+        initialExpenses.add(new Expense(25.30F, "Ari", "Eva", "red_fluffy"));
     }
 
     public LiveData<List<Expense>> getExpenses() {
@@ -78,7 +78,7 @@ public class ExpensesViewModel extends ViewModel {
         return currentUser;
     }
 
-    public void addExpense(double amount, String owes) {
+    public void addExpense(float amount, String owes) {
         List<Expense> currentExpenses = expenses.getValue();
         String isOwed = getCurrentUser();
         String profilePicture = isOwed.equals("Eva") ? "platypus" : "red_fluffy";
@@ -102,7 +102,7 @@ public class ExpensesViewModel extends ViewModel {
         expenses.setValue(currentExpenses);
     }
 
-    public void updateStatus(int position, boolean isSettled) {
+    public void updateStatus(int position) {
         List<Expense> currentExpenses = expenses.getValue();
         if (currentExpenses != null && position >= 0 && position < currentExpenses.size()) {
             currentExpenses.remove(position);

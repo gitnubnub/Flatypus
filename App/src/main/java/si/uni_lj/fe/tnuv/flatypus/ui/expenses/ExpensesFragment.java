@@ -33,7 +33,7 @@ public class ExpensesFragment extends Fragment {
         binding = FragmentExpensesBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        viewModel = new ViewModelProvider(this).get(ExpensesViewModel.class);
+        viewModel = new ViewModelProvider(requireActivity()).get(ExpensesViewModel.class);
 
         String currentUser = viewModel.getCurrentUser();
 
@@ -56,11 +56,11 @@ public class ExpensesFragment extends Fragment {
                     assigneeProfilePicture.setImageResource(R.drawable.platypus);
                     username.setText(expense.getIsOwed());
                     description.setText("you owe");
-                    amount.setText(String.valueOf(expense.getAmount()) + " €");
+                    amount.setText(String.format("%.2f", expense.getAmount()) + " €");
                     settle.setText("Settled");
 
                     final int position = i;
-                    settle.setOnClickListener(v -> viewModel.updateStatus(position, true));
+                    settle.setOnClickListener(v -> viewModel.updateStatus(position));
 
                     expensesContainer1.addView(expenseView);
                 }
@@ -86,11 +86,11 @@ public class ExpensesFragment extends Fragment {
                     assigneeProfilePicture.setImageResource(R.drawable.platypus);
                     username.setText(expense.getOwes());
                     description.setText("owes you");
-                    amount.setText(String.valueOf(expense.getAmount()) + " €");
+                    amount.setText(String.format("%.2f", expense.getAmount()) + " €");
                     settle.setText("Received");
 
                     final int position = i;
-                    settle.setOnClickListener(v -> viewModel.updateStatus(position, true));
+                    settle.setOnClickListener(v -> viewModel.updateStatus(position));
 
                     expensesContainer2.addView(expenseView);
                 }
@@ -143,9 +143,9 @@ public class ExpensesFragment extends Fragment {
                 return;
             }
 
-            double amount;
+            float amount;
             try {
-                amount = Double.parseDouble(amountText);
+                amount = Float.parseFloat(amountText);
             } catch (NumberFormatException e) {
                 amountInput.setError("Invalid amount");
                 return;
