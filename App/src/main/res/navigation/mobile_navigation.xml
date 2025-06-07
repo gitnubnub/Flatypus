@@ -5,7 +5,6 @@
     android:id="@+id/mobile_navigation"
     app:startDestination="@id/navigation_home">
 
-
     <fragment
         android:id="@+id/navigation_shoppinglist"
         android:name="si.uni_lj.fe.tnuv.flatypus.ui.shoppinglist.ShoppingListFragment"
@@ -42,8 +41,7 @@
         android:id="@+id/navigation_chat"
         android:name="si.uni_lj.fe.tnuv.flatypus.ui.dashboard.DashboardFragment"
         android:label="@string/title_chat"
-        tools:layout="@layout/fragment_dashboard">
-    </fragment>
+        tools:layout="@layout/fragment_dashboard" />
 
     <fragment
         android:id="@+id/nav_settings"
@@ -62,26 +60,5 @@
         android:name="si.uni_lj.fe.tnuv.flatypus.ui.notifications.NotificationsFragment"
         android:label="@string/title_notifications"
         tools:layout="@layout/fragment_notifications" />
-    <fragment
-        android:id="@+id/nav_todo"
-        android:name="si.uni_lj.fe.tnuv.flatypus.ui.to_do.ToDoFragment"
-        android:label="To-Do"
-        tools:layout="@layout/fragment_to_do">
-        <action
-            android:id="@+id/action_nav_todo_to_nav_settings"
-            app:destination="@id/nav_settings" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/nav_settings"
-        android:name="si.uni_lj.fe.tnuv.flatypus.ui.settings.SettingsFragment"
-        android:label="Settings"
-        tools:layout="@layout/fragment_settings">
-        <action
-            android:id="@+id/action_nav_settings_to_nav_home"
-            app:destination="@id/navigation_home"
-            app:popUpTo="@id/navigation_home"
-            app:popUpToInclusive="true" />
-    </fragment>
 
 </navigation>

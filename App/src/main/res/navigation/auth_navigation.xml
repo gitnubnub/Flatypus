@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/auth_navigation"
+    app:startDestination="@id/nav_opening">
+
+    <fragment
+        android:id="@+id/nav_opening"
+        android:name="si.uni_lj.fe.tnuv.flatypus.ui.opening.OpeningFragment"
+        android:label="Opening"
+        tools:layout="@layout/fragment_opening">
+        <action
+            android:id="@+id/action_opening_to_nav_login"
+            app:destination="@id/nav_login" />
+        <action
+            android:id="@+id/action_opening_to_nav_register"
+            app:destination="@id/nav_register" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_login"
+        android:name="si.uni_lj.fe.tnuv.flatypus.ui.opening.LoginFragment"
+        android:label="LoginFragment"
+        tools:layout="@layout/fragment_login">
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_register"
+        android:name="si.uni_lj.fe.tnuv.flatypus.ui.opening.RegisterFragment"
+        android:label="RegisterFragment"
+        tools:layout="@layout/fragment_register">
+        <action
+            android:id="@+id/action_nav_register_to_nav_apartment"
+            app:destination="@id/nav_apartment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_apartment"
+        android:name="si.uni_lj.fe.tnuv.flatypus.ui.opening.ApartmentSelectionFragment"
+        android:label="ApartmentSelectionFragment"
+        tools:layout="@layout/fragment_apartment_selection">
+    </fragment>
+</navigation>
