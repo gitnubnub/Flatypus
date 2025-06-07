@@ -1,6 +1,7 @@
 // 1. Plugins block - ESSENTIAL - Place this at the very top
 plugins {
     id("com.android.application") // For an Android application module
+    id("com.google.gms.google-services")
 }
 
 // 2. Android block - ESSENTIAL - Most of your config goes in here
@@ -62,6 +63,15 @@ dependencies {
     implementation(libs.navigation.ui)
     implementation(libs.preference)
     implementation(libs.cardview)
+
+    // Import the BoM for the Firebase platform
+    implementation(platform("com.google.firebase:firebase-bom:33.15.0"))
+
+    // Add the dependency for the Realtime Database library
+    // When using the BoM, you don't specify versions in Firebase library dependencies
+    implementation("com.google.firebase:firebase-database")
+    implementation("com.google.firebase:firebase-analytics")
+    implementation(libs.firebase.database)
 
 
     testImplementation(libs.junit)

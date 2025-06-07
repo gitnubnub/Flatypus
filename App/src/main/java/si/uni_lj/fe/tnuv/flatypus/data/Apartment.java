@@ -1,4 +1,4 @@
-package si.uni_lj.fe.tnuv.flatypus.ui.settings;
+package si.uni_lj.fe.tnuv.flatypus.data;
 
 public class Apartment {
     private String name;

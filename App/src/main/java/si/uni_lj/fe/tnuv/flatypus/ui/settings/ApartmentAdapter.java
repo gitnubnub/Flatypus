@@ -10,6 +10,7 @@ import android.widget.TextView;
 import java.util.List;
 
 import si.uni_lj.fe.tnuv.flatypus.R;
+import si.uni_lj.fe.tnuv.flatypus.data.Apartment;
 
 public class ApartmentAdapter extends BaseAdapter {
 

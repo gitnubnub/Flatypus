@@ -20,14 +20,19 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import si.uni_lj.fe.tnuv.flatypus.R;
+import si.uni_lj.fe.tnuv.flatypus.data.Apartment;
 import si.uni_lj.fe.tnuv.flatypus.databinding.FragmentSettingsBinding;
 
 public class SettingsFragment extends Fragment {
 
+    private DatabaseReference databaseReference;
     private FragmentSettingsBinding binding;
     private String currentUsername = "Eva"; // Default username (replace with dynamic source if needed)
     private String currentApartmentCode = "XDSYI"; // Default apartment code (replace with dynamic source if needed)
@@ -44,6 +49,9 @@ public class SettingsFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        FirebaseDatabase database = FirebaseDatabase.getInstance("https://flatypus-fde01-default-rtdb.europe-west1.firebasedatabase.app");
+        databaseReference = database.getReference();
+
         binding = FragmentSettingsBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
@@ -59,6 +67,8 @@ public class SettingsFragment extends Fragment {
         EditText usernameInput = binding.usernameInput;
         usernameInput.setText(currentUsername);
         usernameInput.setOnClickListener(v -> showUsernameDialog());
+        ImageButton changeNameButton = binding.changeNameButton;
+        changeNameButton.setOnClickListener(v -> showUsernameDialog());
 
         // Profile Picture
         ImageView profilePicture = binding.profilePicture;
