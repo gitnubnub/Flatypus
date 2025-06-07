@@ -28,16 +28,19 @@ import java.util.List;
 
 import si.uni_lj.fe.tnuv.flatypus.R;
 import si.uni_lj.fe.tnuv.flatypus.data.Apartment;
+import si.uni_lj.fe.tnuv.flatypus.data.Chat;
+import si.uni_lj.fe.tnuv.flatypus.data.Expense;
+import si.uni_lj.fe.tnuv.flatypus.data.Task;
 import si.uni_lj.fe.tnuv.flatypus.databinding.FragmentSettingsBinding;
 
 public class SettingsFragment extends Fragment {
 
     private DatabaseReference databaseReference;
     private FragmentSettingsBinding binding;
-    private String currentUsername = "Eva"; // Default username (replace with dynamic source if needed)
-    private String currentApartmentCode = "XDSYI"; // Default apartment code (replace with dynamic source if needed)
+    private String currentUsername = "Eva"; // Pull from database Default username (replace with dynamic source if needed)
+    private String currentApartmentCode = "XDSYI"; // Pull from database Default apartment code (replace with dynamic source if needed)
 
-    private int currentProfilePicture = R.drawable.pfp_red;
+    private int currentProfilePicture = R.drawable.pfp_red; // Pull from database (if empty, set to red)
 
     private final int[] profilePictures = {
             R.drawable.pfp_red,
@@ -56,9 +59,9 @@ public class SettingsFragment extends Fragment {
         View root = binding.getRoot();
 
         // Initialize user apartments (replace with dynamic data source if needed)
-        userApartments = new ArrayList<>();
-        userApartments.add(new Apartment("Apartment 1", "XDSYI"));
-        userApartments.add(new Apartment("Apartment 2", "ABCDE"));
+        userApartments = new ArrayList<>(); //pull from database
+        userApartments.add(new Apartment("Apartment 1", "XDSYI", new ArrayList<String>(), new ArrayList<Expense>(), new ArrayList<Task>(), new ArrayList<Chat>()));
+        userApartments.add(new Apartment("Apartment 2", "ABCDE", new ArrayList<String>(), new ArrayList<Expense>(), new ArrayList<Task>(), new ArrayList<Chat>()));
 
         // Back Button
         binding.backButton.setOnClickListener(v -> requireActivity().onBackPressed());
@@ -239,7 +242,7 @@ public class SettingsFragment extends Fragment {
                     }
                     // Simulate joining an apartment (replace with actual logic)
                     String apartmentName = "Apartment " + (userApartments.size() + 1); // Placeholder name
-                    Apartment newApartment = new Apartment(apartmentName, code);
+                    Apartment newApartment = new Apartment(apartmentName, code, new ArrayList<String>(), new ArrayList<Expense>(), new ArrayList<Task>(), new ArrayList<Chat>());
                     adapter.addApartment(newApartment);
                     Toast.makeText(requireContext(), "Joined " + apartmentName, Toast.LENGTH_SHORT).show();
                     // Implement your join apartment logic here (e.g., API call)
