@@ -15,17 +15,22 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.List;
+
 import si.uni_lj.fe.tnuv.flatypus.R;
 import si.uni_lj.fe.tnuv.flatypus.databinding.FragmentShoppingListBinding;
+import si.uni_lj.fe.tnuv.flatypus.ui.expenses.ExpensesViewModel;
 
 public class ShoppingListFragment extends Fragment {
 
     private FragmentShoppingListBinding binding;
     private ShoppingListViewModel viewModel;
+    private ExpensesViewModel expViewModel;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         viewModel = new ViewModelProvider(this).get(ShoppingListViewModel.class);
+        expViewModel = new ViewModelProvider(requireActivity()).get(ExpensesViewModel.class);
 
         binding = FragmentShoppingListBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
@@ -48,7 +53,7 @@ public class ShoppingListFragment extends Fragment {
                 final int position = i;
                 itemCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
                     String currentUser = viewModel.getCurrentUser();
-                    showPriceInputDialog(shoppingItem, position, isChecked);
+                    showPriceInputDialog(position, currentUser);
                     itemCheckbox.setChecked(false);
                 });
 
@@ -61,7 +66,7 @@ public class ShoppingListFragment extends Fragment {
         return root;
     }
 
-    private void showPriceInputDialog(ShoppingListViewModel.ShoppingItem shoppingItem, int position, boolean isChecked) {
+    private void showPriceInputDialog(int position, String currentUser) {
         View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.input_price_layout, null);
 
         EditText itemPriceInput = dialogView.findViewById(R.id.item_price_input);
@@ -77,11 +82,26 @@ public class ShoppingListFragment extends Fragment {
 
         // Handle add item button
         addExpenseButton.setOnClickListener(v -> {
-            String itemName = itemPriceInput.getText().toString().trim();
+            String itemName = itemPriceInput.getText().toString();
 
             if (!itemName.isEmpty()) {
-                // TODO: add the input to the expenses tab
-                dialog.dismiss();
+                float price;
+                try {
+                    price = Float.parseFloat(itemName);
+
+                    List<ExpensesViewModel.Roommate> roommates = expViewModel.getRoommates().getValue();
+                    for (ExpensesViewModel.Roommate roommate : roommates) {
+                        if (roommate.getName() != currentUser) {
+                            expViewModel.addExpense(price / roommates.size(), roommate.getName());
+                        }
+                    }
+
+                    viewModel.toggleItem(position);
+                    dialog.dismiss();
+                } catch (NumberFormatException e) {
+                    itemPriceInput.setError("Invalid amount");
+                    return;
+                }
             } else {
                 itemPriceInput.setError("Item price cannot be empty");
             }
