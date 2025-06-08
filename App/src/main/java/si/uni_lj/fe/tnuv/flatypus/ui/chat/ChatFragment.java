@@ -24,6 +24,8 @@ public class ChatFragment extends Fragment {
         binding = FragmentChatBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+        binding.backButton.setOnClickListener(v -> requireActivity().onBackPressed());
+
         return root;
     }
 

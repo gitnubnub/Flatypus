@@ -25,6 +25,9 @@
         <action
             android:id="@+id/action_nav_home_to_nav_settings"
             app:destination="@id/nav_settings" />
+        <action
+            android:id="@+id/action_nav_home_to_nav_notifications"
+            app:destination="@id/navigation_notifications" />
     </fragment>
 
     <fragment

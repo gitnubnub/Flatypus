@@ -34,6 +34,11 @@ public class HomeFragment extends Fragment {
             Navigation.findNavController(v).navigate(R.id.action_nav_home_to_nav_settings);
         });
 
+        // Notification Icon Navigation
+        binding.notificationIcon.setOnClickListener(v -> {
+            Navigation.findNavController(v).navigate(R.id.action_nav_home_to_nav_notifications);
+        });
+
         // Character Image
         /*ImageView characterImage = binding.characterImage;
         homeViewModel.getCharacter().observe(getViewLifecycleOwner(), character -> {

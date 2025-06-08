@@ -60,10 +60,10 @@ public class MainActivity extends AppCompatActivity {
 
         // Add a listener to toggle BottomNavigationView visibility
         navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
-            if (destination.getId() == R.id.nav_settings) {
-                navView.setVisibility(View.GONE); // Hide the bottom navigation on SettingsFragment
+            if (destination.getId() == R.id.navigation_shoppinglist || destination.getId() == R.id.navigation_expenses || destination.getId() == R.id.navigation_home || destination.getId() == R.id.navigation_todo) {
+                navView.setVisibility(View.VISIBLE);
             } else {
-                navView.setVisibility(View.VISIBLE); // Show it on other fragments
+                navView.setVisibility(View.GONE);
             }
         });
     }

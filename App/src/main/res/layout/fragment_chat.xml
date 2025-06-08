@@ -36,23 +36,43 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="hey, will anybody be in the apartment on friday?\nI'm having a package delivered\ncould anyone take it for me?"
-                android:backgroundTint="@color/wheat"
+                android:text="hey, will anybody be in the apartment on friday? I'm having a package delivered\ncould anyone take it for me?"
+                android:background="@drawable/received_message_bckg"
                 android:padding="12dp"
-                android:textColor="#4A2C2A"
+                android:textColor="@color/dark_red"
                 android:textSize="16sp"
                 android:layout_marginBottom="8dp"
-                android:layout_gravity="end" />
+                android:layout_gravity="start" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/pfp_red" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="username"
+                    android:textColor="@color/wheat"
+                    android:textSize="13sp"
+                    android:gravity="center" />
+            </LinearLayout>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="I'll only be there in the morning\ndo you know when exactly the delivery will be?"
+                android:text="I'll only be there in the morning do you know when exactly the delivery will be?"
+                android:background="@drawable/sent_message_bckg"
                 android:padding="12dp"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/wheat"
                 android:textSize="16sp"
                 android:layout_marginBottom="8dp"
-                android:layout_gravity="start" />
+                android:layout_gravity="end" />
         </LinearLayout>
     </ScrollView>
 
@@ -62,29 +82,30 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:background="#D7BBA0"
+        android:background="@color/lion"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:padding="8dp">
 
-    <EditText
-        android:id="@+id/message_input"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:hint="Message your roommates"
-        android:textColor="#4A2C2A"
-        android:textSize="16sp"
-        android:background="@null"
-        android:padding="8dp" />
+        <EditText
+            android:id="@+id/message_input"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Message your roommates"
+            android:textColorHint="@color/lion"
+            android:textColor="@color/dark_red"
+            android:textSize="16sp"
+            android:background="@drawable/edittext_background"
+            android:padding="8dp" />
 
-    <ImageButton
-        android:id="@+id/send_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Send"
-        android:padding="8dp" />
-</LinearLayout>
+        <ImageButton
+            android:id="@+id/send_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Send"
+            android:padding="8dp" />
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -4,16 +4,40 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+
+import si.uni_lj.fe.tnuv.flatypus.ui.opening.UserViewModel;
+import si.uni_lj.fe.tnuv.flatypus.ui.opening.UserViewModel.User;
+
 public class ChatViewModel extends ViewModel {
 
-    private final MutableLiveData<String> mText;
+    public static class Chat {
+        private String message;
+        private User sender;
+        private Instant timestamp;
 
-    public ChatViewModel() {
-        mText = new MutableLiveData<>();
-        mText.setValue("This is dashboard fragment");
+        private Chat(String message, User sender, Instant timestamp) {
+            this.message = message;
+            this.sender = sender;
+            this.timestamp = timestamp;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+        public User getSender() {
+            return sender;
+        }
+        public Instant getTimestamp() {
+            return timestamp;
+        }
     }
 
-    public LiveData<String> getText() {
-        return mText;
+    private final MutableLiveData<List<Chat>> chats = new MutableLiveData<>(new ArrayList<>());
+
+    public ChatViewModel() {
+        List<Chat> initialChats = new ArrayList<>();
     }
 }
