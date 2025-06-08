@@ -2,6 +2,7 @@
 plugins {
     id("com.android.application") // For an Android application module
     id("com.google.gms.google-services")
+    //id("org.jetbrains.kotlin.android")  // or "org.jetbrains.kotlin.jvm" depending on your module
 }
 
 // 2. Android block - ESSENTIAL - Most of your config goes in here
@@ -39,6 +40,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
+    /*kotlinOptions {
+        jvmTarget = "11"  // match your Java version here (or "1.8" if you want)
+    }*/
+
 
     buildFeatures {
         viewBinding = true
@@ -63,6 +68,8 @@ dependencies {
     implementation(libs.navigation.ui)
     implementation(libs.preference)
     implementation(libs.cardview)
+
+    //implementation(project(":rajawali"))
 
     // Import the BoM for the Firebase platform
     implementation(platform("com.google.firebase:firebase-bom:33.15.0"))
