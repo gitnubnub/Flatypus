@@ -41,9 +41,13 @@ public class LoginFragment extends Fragment {
             }
 
             viewModel.login(email, password);
-            if (!viewModel.isLoggedIn().getValue()) {
-                Toast.makeText(requireContext(), "Invalid email or password", Toast.LENGTH_SHORT).show();
-            }
+            viewModel.isLoggedIn().observe(getViewLifecycleOwner(), isLoggedIn -> {
+                if (isLoggedIn == null) return;
+
+                if (!isLoggedIn) {
+                    Toast.makeText(requireContext(), "Invalid email or password", Toast.LENGTH_SHORT).show();
+                }
+            });
         });
 
         return root;
