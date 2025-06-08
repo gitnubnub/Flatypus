@@ -1,9 +1,11 @@
 package si.uni_lj.fe.tnuv.flatypus.ui.opening;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -11,6 +13,8 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
+
+import java.security.SecureRandom;
 
 import si.uni_lj.fe.tnuv.flatypus.R;
 import si.uni_lj.fe.tnuv.flatypus.databinding.FragmentApartmentSelectionBinding;
@@ -30,7 +34,7 @@ public class ApartmentSelectionFragment extends Fragment {
 
         EditText apartmentCodeInput = binding.apartmentCodeInput;
 
-        binding.createApartmentButton.setOnClickListener(v -> {
+        binding.joinApartmentButton.setOnClickListener(v -> {
             String apartmentCode = apartmentCodeInput.getText().toString().trim();
 
             if (apartmentCode.isEmpty()) {
@@ -41,7 +45,47 @@ public class ApartmentSelectionFragment extends Fragment {
             viewModel.addApartment(apartmentCode);
         });
 
+        binding.createApartmentButton.setOnClickListener(v -> showCreateApartmentDialog());
+
         return root;
+    }
+
+    private void showCreateApartmentDialog() {
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.create_apartment_layout, null);
+
+        EditText apartmentNameInput = dialogView.findViewById(R.id.apartment_name_input);
+        Button createApartmentButton = dialogView.findViewById(R.id.create_apartment_confirm_button);
+
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                .setTitle("Create Apartment")
+                .setView(dialogView)
+                .setNegativeButton("Cancel", (d, which) -> d.dismiss())
+                .create();
+        dialog.show();
+
+        createApartmentButton.setOnClickListener(v -> {
+            String apartmentName = apartmentNameInput.getText().toString().trim();
+            String apartmentCode = generateRandomString();
+
+            if (!apartmentName.isEmpty()) {
+                viewModel.addApartment(apartmentCode);
+                dialog.dismiss();
+            } else {
+                apartmentNameInput.setError("Item name cannot be empty");
+            }
+        });
+    }
+
+    public static String generateRandomString() {
+        final SecureRandom random = new SecureRandom();
+        final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+        StringBuilder sb = new StringBuilder(5);
+        for (int i = 0; i < 5; i++) {
+            int index = random.nextInt(CHARACTERS.length());
+            sb.append(CHARACTERS.charAt(index));
+        }
+        return sb.toString();
     }
 
     @Override

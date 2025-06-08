@@ -157,7 +157,27 @@ public class UserViewModel extends ViewModel {
         if (current != null) {
             List<String> currentApartments = current.getApartments();
             currentApartments.add(apartmentCode);
+            current.currentApartment = apartmentCode;
+
             currentUser.setValue(current);
+
+            databaseReference.orderByChild("email").equalTo(current.getEmail())
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            for (DataSnapshot userSnapshot : snapshot.getChildren()) {
+                                userSnapshot.getRef().child("apartments").setValue(currentApartments);
+                                userSnapshot.getRef().child("currentApartment").setValue(apartmentCode);
+                                break;
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            Log.e("UserViewModel", "Database error: " + error.getMessage());
+                        }
+                    });
+
             isLoggedIn.setValue(true);
         }
     }
