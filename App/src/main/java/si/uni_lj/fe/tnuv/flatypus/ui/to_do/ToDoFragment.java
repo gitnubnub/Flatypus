@@ -24,26 +24,28 @@ import java.util.List;
 
 import si.uni_lj.fe.tnuv.flatypus.R;
 import si.uni_lj.fe.tnuv.flatypus.databinding.FragmentToDoBinding;
+import si.uni_lj.fe.tnuv.flatypus.ui.opening.UserViewModel;
 
 
 public class ToDoFragment extends Fragment {
 
     private FragmentToDoBinding binding;
-    private si.uni_lj.fe.tnuv.flatypus.ui.todo.ToDoViewModel toDoViewModel;
+    private si.uni_lj.fe.tnuv.flatypus.ui.to_do.ToDoViewModel toDoViewModel;
+    private UserViewModel userViewModel;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        toDoViewModel = new ViewModelProvider(this).get(si.uni_lj.fe.tnuv.flatypus.ui.todo.ToDoViewModel.class);
+        toDoViewModel = new ViewModelProvider(this).get(si.uni_lj.fe.tnuv.flatypus.ui.to_do.ToDoViewModel.class);
+        userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
 
         binding = FragmentToDoBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        // To-Do List
         LinearLayout todoListContainer = binding.todoListContainer;
         toDoViewModel.getTasks().observe(getViewLifecycleOwner(), tasks -> {
             todoListContainer.removeAllViews();
             for (int i = 0; i < tasks.size(); i++) {
-                si.uni_lj.fe.tnuv.flatypus.ui.todo.ToDoViewModel.Task task = tasks.get(i);
+                ToDoViewModel.Task task = tasks.get(i);
                 View taskView = inflater.inflate(R.layout.task_layout, todoListContainer, false);
 
                 // Set up task item
@@ -54,12 +56,7 @@ public class ToDoFragment extends Fragment {
                 taskCheckbox.setChecked(task.isCompleted());
                 taskName.setText(task.getName());
 
-                // Set profile picture (replace with actual resource handling)
-                if ("platypus".equals(task.getProfilePicture())) {
-                    assigneeProfilePicture.setImageResource(R.drawable.platypus);
-                } else if ("red_fluffy".equals(task.getProfilePicture())) {
-                    assigneeProfilePicture.setImageResource(R.drawable.platypus);
-                }
+                assigneeProfilePicture.setImageResource(task.getProfilePicture());
 
                 // Handle checkbox interaction
                 final int position = i;
@@ -83,7 +80,7 @@ public class ToDoFragment extends Fragment {
         return root;
     }
 
-    private void showReassignWarningDialog(si.uni_lj.fe.tnuv.flatypus.ui.todo.ToDoViewModel.Task task, int position, boolean isChecked) {
+    private void showReassignWarningDialog(ToDoViewModel.Task task, int position, boolean isChecked) {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Warning")
                 .setMessage("This task is assigned to " + task.getAssignee() + ". Are you sure you want to take it?")
@@ -103,13 +100,15 @@ public class ToDoFragment extends Fragment {
         Spinner repeatSpinner = dialogView.findViewById(R.id.repeat_spinner);
         Button addTaskButton = dialogView.findViewById(R.id.add_task_confirm_button);
 
-        // Populate assignee spinner
-        List<String> assigneeOptions = new ArrayList<>(toDoViewModel.getRoommates());
-        assigneeOptions.add("Random");
-        ArrayAdapter<String> assigneeAdapter = new ArrayAdapter<>(
-                requireContext(), android.R.layout.simple_spinner_item, assigneeOptions);
-        assigneeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        assigneeSpinner.setAdapter(assigneeAdapter);
+        // Populate assignee spinner with LiveData
+        toDoViewModel.getRoommates().observe(getViewLifecycleOwner(), roommates -> {
+            ArrayList<String> assigneeOptions = new ArrayList<>(roommates);
+            assigneeOptions.add("Random");
+            ArrayAdapter<String> assigneeAdapter = new ArrayAdapter<>(
+                    requireContext(), android.R.layout.simple_spinner_item, assigneeOptions);
+            assigneeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            assigneeSpinner.setAdapter(assigneeAdapter);
+        });
 
         // Populate repeat spinner
         String[] repeatOptions = {"None", "Weekly", "Monthly"};
