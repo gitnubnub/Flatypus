@@ -20,44 +20,50 @@ import java.util.List;
 import si.uni_lj.fe.tnuv.flatypus.R;
 import si.uni_lj.fe.tnuv.flatypus.databinding.FragmentShoppingListBinding;
 import si.uni_lj.fe.tnuv.flatypus.ui.expenses.ExpensesViewModel;
+import si.uni_lj.fe.tnuv.flatypus.ui.opening.UserViewModel;
 
 public class ShoppingListFragment extends Fragment {
 
     private FragmentShoppingListBinding binding;
     private ShoppingListViewModel viewModel;
     private ExpensesViewModel expViewModel;
+    private UserViewModel userViewModel;
+    private String currentApartmentCode;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         viewModel = new ViewModelProvider(this).get(ShoppingListViewModel.class);
         expViewModel = new ViewModelProvider(requireActivity()).get(ExpensesViewModel.class);
+        userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
 
         binding = FragmentShoppingListBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        LinearLayout shoppingListContainer = binding.shoppingListContainer;
-        viewModel.getShoppingItems().observe(getViewLifecycleOwner(), shoppingItems -> {
-            shoppingListContainer.removeAllViews();
-            for (int i = 0; i < shoppingItems.size(); i++) {
-                ShoppingListViewModel.ShoppingItem shoppingItem = shoppingItems.get(i);
-                View itemView = inflater.inflate(R.layout.item_shopping_list, shoppingListContainer, false);
+        userViewModel.getCurrentUser().observe(getViewLifecycleOwner(), user -> {
+            if (user != null) {
+                currentApartmentCode = user.getCurrentApartment();
 
-                // set up shopping item
-                CheckBox itemCheckbox = itemView.findViewById(R.id.item_checkbox);
-                TextView itemName = itemView.findViewById(R.id.item_text);
+                viewModel.getShoppingItems(currentApartmentCode).observe(getViewLifecycleOwner(), shoppingItems -> {
+                    LinearLayout shoppingListContainer = binding.shoppingListContainer;
+                    shoppingListContainer.removeAllViews();
+                    for (int i = 0; i < shoppingItems.size(); i++) {
+                        ShoppingListViewModel.ShoppingItem shoppingItem = shoppingItems.get(i);
+                        View itemView = inflater.inflate(R.layout.item_shopping_list, shoppingListContainer, false);
 
-                itemCheckbox.setChecked(shoppingItem.isChecked());
-                itemName.setText(shoppingItem.getName());
+                        CheckBox itemCheckbox = itemView.findViewById(R.id.item_checkbox);
+                        TextView itemName = itemView.findViewById(R.id.item_text);
 
-                // checkbox interaction
-                final int position = i;
-                itemCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                    String currentUser = viewModel.getCurrentUser();
-                    showPriceInputDialog(position, currentUser);
-                    itemCheckbox.setChecked(false);
+                        itemCheckbox.setChecked(shoppingItem.isChecked());
+                        itemName.setText(shoppingItem.getName());
+
+                        final int position = i;
+                        itemCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                            showPriceInputDialog(position, user);
+                        });
+
+                        shoppingListContainer.addView(itemView);
+                    }
                 });
-
-                shoppingListContainer.addView(itemView);
             }
         });
 
@@ -66,7 +72,7 @@ public class ShoppingListFragment extends Fragment {
         return root;
     }
 
-    private void showPriceInputDialog(int position, String currentUser) {
+    private void showPriceInputDialog(int position, UserViewModel.User currentUser) {
         View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.input_price_layout, null);
 
         EditText itemPriceInput = dialogView.findViewById(R.id.item_price_input);
@@ -82,19 +88,20 @@ public class ShoppingListFragment extends Fragment {
 
         // Handle add item button
         addExpenseButton.setOnClickListener(v -> {
-            String itemName = itemPriceInput.getText().toString();
+            String itemPrice = itemPriceInput.getText().toString();
 
-            if (!itemName.isEmpty()) {
+            if (!itemPrice.isEmpty()) {
                 float price;
                 try {
-                    price = Float.parseFloat(itemName);
+                    price = Float.parseFloat(itemPrice);
 
-                    List<ExpensesViewModel.Roommate> roommates = expViewModel.getRoommates().getValue();
-                    for (ExpensesViewModel.Roommate roommate : roommates) {
-                        if (roommate.getName() != currentUser) {
-                            expViewModel.addExpense(price / roommates.size(), roommate.getName());
+                    userViewModel.getRoommates(currentApartmentCode).observe(getViewLifecycleOwner(), roommates -> {
+                        for (UserViewModel.User roommate : roommates) {
+                            if (roommate.getEmail() != currentUser.getEmail()) {
+                                expViewModel.addExpense(currentApartmentCode, price / roommates.size(), roommate.getEmail(), currentUser.getEmail());
+                            }
                         }
-                    }
+                    });
 
                     viewModel.toggleItem(position);
                     dialog.dismiss();
@@ -127,7 +134,7 @@ public class ShoppingListFragment extends Fragment {
             String itemName = itemNameInput.getText().toString().trim();
 
             if (!itemName.isEmpty()) {
-                viewModel.addItem(itemName);
+                viewModel.addItem(itemName, currentApartmentCode);
                 dialog.dismiss();
             } else {
                 itemNameInput.setError("Item name cannot be empty");

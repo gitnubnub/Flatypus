@@ -1,27 +1,42 @@
 package si.uni_lj.fe.tnuv.flatypus.ui.expenses;
 
+import android.util.Log;
+
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ExpensesViewModel extends ViewModel {
 
     public static class Expense {
+        private String apartment;
         private float amount;
         private String owes;
         private String isOwed;
-        private String profilePicture;
+        private boolean settled;
 
-        public Expense(float amount, String owes, String isOwed, String profilePicture) {
+        public Expense() {}
+
+        public Expense(String apartment, float amount, String owes, String isOwed, boolean settled) {
+            this.apartment = apartment;
             this.amount = amount;
             this.owes = owes;
             this.isOwed = isOwed;
-            this.profilePicture = profilePicture;
+            this.settled = settled;
         }
 
+        public String getApartment() { return apartment; }
         public float getAmount() {
             return amount;
         }
@@ -31,92 +46,68 @@ public class ExpensesViewModel extends ViewModel {
         public String getOwes() {
             return owes;
         }
-        public String getProfilePicture() {
-            return profilePicture;
-        }
-    }
-
-    public static class Roommate {
-        private String name;
-        private boolean isSelected;
-
-        public Roommate(String name) {
-            this.name = name;
-            this.isSelected = false;
-        }
-
-        public String getName() { return name; }
-        public boolean isSelected() { return isSelected; }
-        public void setSelected(boolean selected) { isSelected = selected; }
+        public boolean isSettled() { return settled; }
+        public void setSettled(boolean settled) { this.settled = settled; }
     }
 
     private final MutableLiveData<List<Expense>> expenses = new MutableLiveData<>(new ArrayList<>());
-    private final MutableLiveData<List<Roommate>> roommates = new MutableLiveData<>(new ArrayList<>());
-    private final String currentUser = "Eva";
+    private DatabaseReference databaseReference;
 
     public ExpensesViewModel() {
-        List<Roommate> initialRoommates = new ArrayList<>();
-        initialRoommates.add(new Roommate("Eva"));
-        initialRoommates.add(new Roommate("John"));
-        initialRoommates.add(new Roommate("Alice"));
-        initialRoommates.add(new Roommate("Ari"));
-        initialRoommates.add(new Roommate("Urška"));
-        roommates.setValue(initialRoommates);
-
-        List<Expense> initialExpenses = new ArrayList<>();
-        initialExpenses.add(new Expense(15.46F, "Eva", "Urška", "platypus"));
-        initialExpenses.add(new Expense(25.30F, "Ari", "Eva", "red_fluffy"));
+        FirebaseDatabase database = FirebaseDatabase.getInstance("https://flatypus-fde01-default-rtdb.europe-west1.firebasedatabase.app");
+        databaseReference = database.getReference("expenses");
     }
 
-    public LiveData<List<Expense>> getExpenses() {
+    public LiveData<List<Expense>> getExpenses(String apartment, String user) {
+        databaseReference.orderByChild("apartment").equalTo(apartment)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        List<Expense> filteredExpenses = new ArrayList<>();
+                        for (DataSnapshot expenseSnapshot : snapshot.getChildren()) {
+                            Expense expense = expenseSnapshot.getValue(Expense.class);
+                            if (expense != null) {
+                                if (expense.isSettled()) {
+                                    expenseSnapshot.getRef().removeValue();
+                                } else {
+                                    if (user.equals(expense.owes) || user.equals(expense.isOwed)) {
+                                        filteredExpenses.add(expense);
+                                    }
+                                }
+                            }
+                        }
+                        expenses.setValue(filteredExpenses);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        expenses.setValue(Collections.emptyList());
+                        Log.e("Expenses", "Database error: " + error.getMessage());
+                    }
+                });
+
         return expenses;
     }
-    public LiveData<List<Roommate>> getRoommates() {
-        return roommates;
-    }
-    public String getCurrentUser() {
-        return currentUser;
-    }
 
-    public void addExpense(float amount, String owes) {
-        List<Expense> currentExpenses = expenses.getValue();
-        String isOwed = getCurrentUser();
-        String profilePicture = isOwed.equals("Eva") ? "platypus" : "red_fluffy";
-
-        if (currentExpenses == null) {
-            currentExpenses = new ArrayList<>();
+    public void addExpense(String apartment, float amount, String owes, String isOwed) {
+        Expense newExpense = new Expense(apartment, amount, owes, isOwed, false);
+        String expenseId = databaseReference.push().getKey();
+        if (expenseId != null) {
+            databaseReference.child(expenseId).setValue(newExpense)
+                    .addOnSuccessListener(aVoid ->
+                            Log.d("Shopping", "Item added successfully")
+                    ).addOnFailureListener(e ->
+                            Log.e("Shopping", "Failed to add item: " + e.getMessage())
+                    );
         }
-
-        boolean alreadyInDebt = false;
-        for (Expense debt : currentExpenses) {
-            if (debt.owes == owes && debt.isOwed == isOwed) {
-                alreadyInDebt = true;
-                debt.amount += amount;
-            }
-        }
-
-        if (!alreadyInDebt) {
-            currentExpenses.add(new Expense(amount, owes, isOwed, profilePicture));
-        }
-
-        expenses.setValue(currentExpenses);
     }
 
     public void updateStatus(int position) {
         List<Expense> currentExpenses = expenses.getValue();
         if (currentExpenses != null && position >= 0 && position < currentExpenses.size()) {
-            currentExpenses.remove(position);
+            Expense expense = currentExpenses.get(position);
+            expense.setSettled(!expense.isSettled());
             expenses.setValue(currentExpenses);
-        }
-    }
-
-    public void resetRoommateSelections() {
-        List<Roommate> currentRoommates = roommates.getValue();
-        if (currentRoommates != null) {
-            for (Roommate roommate : currentRoommates) {
-                roommate.setSelected(false);
-            }
-            roommates.setValue(currentRoommates);
         }
     }
 }

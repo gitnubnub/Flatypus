@@ -40,18 +40,5 @@
         android:name="si.uni_lj.fe.tnuv.flatypus.ui.opening.ApartmentSelectionFragment"
         android:label="ApartmentSelectionFragment"
         tools:layout="@layout/fragment_apartment_selection">
-        <action
-            android:id="@+id/action_nav_apartment_to_nav_settings"
-            app:destination="@id/nav_settings" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/nav_settings"
-        android:name="si.uni_lj.fe.tnuv.flatypus.ui.settings.SettingsFragment"
-        android:label="Settings"
-        tools:layout="@layout/fragment_settings">
-        <action
-            android:id="@+id/action_nav_settings_to_nav_opening"
-            app:destination="@id/nav_login" />
     </fragment>
 </navigation>

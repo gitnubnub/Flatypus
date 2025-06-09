@@ -14,6 +14,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class UserViewModel extends ViewModel {
@@ -77,6 +78,61 @@ public class UserViewModel extends ViewModel {
 
     public LiveData<Boolean> isLoggedIn() {
         return isLoggedIn;
+    }
+
+    public LiveData<User> getUserByMail(String email) {
+        MutableLiveData<User> userLiveData = new MutableLiveData<>();
+
+        databaseReference.orderByChild("email").equalTo(email)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for (DataSnapshot userSnapshot : snapshot.getChildren()) {
+                            User user = userSnapshot.getValue(User.class);
+                            if (user != null) {
+                                userLiveData.setValue(user);
+                                return;
+                            }
+                        }
+                        userLiveData.setValue(null);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.e("UserLookup", "Database error: " + error.getMessage());
+                        userLiveData.setValue(null);
+                    }
+                });
+
+        return userLiveData;
+    }
+
+    public LiveData<List<User>> getRoommates(String apartment) {
+        MutableLiveData<List<User>> roommates = new MutableLiveData<>(new ArrayList<>());
+
+        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                List<User> result = new ArrayList<>();
+
+                for (DataSnapshot userSnapshot : snapshot.getChildren()) {
+                    User user = userSnapshot.getValue(User.class);
+                    if (user != null && user.getApartments() != null && user.getApartments().contains(apartment)) {
+                        result.add(user);
+                    }
+                }
+
+                roommates.setValue(result);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("Roommates", "Database error: " + error.getMessage());
+                roommates.setValue(Collections.emptyList());
+            }
+        });
+
+        return roommates;
     }
 
     public void login(String email, String password) {

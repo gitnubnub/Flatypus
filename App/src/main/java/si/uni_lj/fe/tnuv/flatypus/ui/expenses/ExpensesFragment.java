@@ -18,15 +18,20 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import si.uni_lj.fe.tnuv.flatypus.R;
 import si.uni_lj.fe.tnuv.flatypus.databinding.FragmentExpensesBinding;
+import si.uni_lj.fe.tnuv.flatypus.ui.opening.UserViewModel;
 
 public class ExpensesFragment extends Fragment {
 
     private FragmentExpensesBinding binding;
     private ExpensesViewModel viewModel;
+    private UserViewModel userViewModel;
+    private String currentUser;
+    private String currentApartmentCode;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -34,66 +39,92 @@ public class ExpensesFragment extends Fragment {
         View root = binding.getRoot();
 
         viewModel = new ViewModelProvider(requireActivity()).get(ExpensesViewModel.class);
+        userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
 
-        String currentUser = viewModel.getCurrentUser();
+        userViewModel.getCurrentUser().observe(getViewLifecycleOwner(), user -> {
+            if (user != null) {
+                currentUser = user.getEmail();
+                currentApartmentCode = user.getCurrentApartment();
 
-        // expenses you owe
-        LinearLayout expensesContainer1 = binding.expensesContainer1;
-        viewModel.getExpenses().observe(getViewLifecycleOwner(), expenses -> {
-            expensesContainer1.removeAllViews();
+                // expenses you owe
+                LinearLayout expensesContainer1 = binding.expensesContainer1;
+                viewModel.getExpenses(currentApartmentCode, currentUser).observe(getViewLifecycleOwner(), expenses -> {
+                    expensesContainer1.removeAllViews();
 
-            for (int i = 0; i < expenses.size(); i++) {
-                ExpensesViewModel.Expense expense = expenses.get(i);
-                if (expense.getOwes().equals(currentUser)) {
-                    View expenseView = inflater.inflate(R.layout.expense_layout, expensesContainer1, false);
+                    for (int i = 0; i < expenses.size(); i++) {
+                        ExpensesViewModel.Expense expense = expenses.get(i);
+                        if (expense.getOwes().equals(currentUser)) {
+                            View expenseView = inflater.inflate(R.layout.expense_layout, expensesContainer1, false);
 
-                    ImageView assigneeProfilePicture = expenseView.findViewById(R.id.assignee_profile_picture);
-                    TextView username = expenseView.findViewById(R.id.user_name);
-                    TextView description = expenseView.findViewById(R.id.expense_description);
-                    TextView amount = expenseView.findViewById(R.id.amount_text);
-                    Button settle = expenseView.findViewById(R.id.action_button);
+                            int finalI = i;
+                            userViewModel.getUserByMail(expense.getIsOwed()).observe(getViewLifecycleOwner(), otherUser -> {
+                                ImageView assigneeProfilePicture = expenseView.findViewById(R.id.assignee_profile_picture);
+                                TextView username = expenseView.findViewById(R.id.user_name);
+                                TextView description = expenseView.findViewById(R.id.expense_description);
+                                TextView amount = expenseView.findViewById(R.id.amount_text);
+                                Button settle = expenseView.findViewById(R.id.action_button);
 
-                    assigneeProfilePicture.setImageResource(R.drawable.platypus);
-                    username.setText(expense.getIsOwed());
-                    description.setText("you owe");
-                    amount.setText(String.format("%.2f", expense.getAmount()) + " €");
-                    settle.setText("Settled");
+                                assigneeProfilePicture.setImageResource(otherUser.getProfilePicture());
+                                username.setText(otherUser.getUsername());
+                                description.setText("you owe");
+                                amount.setText(String.format("%.2f", expense.getAmount()) + " €");
+                                settle.setText("Settled");
 
-                    final int position = i;
-                    settle.setOnClickListener(v -> viewModel.updateStatus(position));
+                                final int position = finalI;
+                                settle.setOnClickListener(v -> {
+                                    viewModel.updateStatus(position);
+                                    if (expense.isSettled()) {
+                                        settle.setText("Settled \u2713");
+                                    } else {
+                                        settle.setText("Settled");
+                                    }
+                                });
+                            });
 
-                    expensesContainer1.addView(expenseView);
-                }
-            }
-        });
+                            expensesContainer1.addView(expenseView);
+                        }
+                    }
+                });
 
-        // expenses you are owed
-        LinearLayout expensesContainer2 = binding.expensesContainer2;
-        viewModel.getExpenses().observe(getViewLifecycleOwner(), expenses -> {
-            expensesContainer2.removeAllViews();
+                // expenses you are owed
+                LinearLayout expensesContainer2 = binding.expensesContainer2;
+                viewModel.getExpenses(currentApartmentCode, currentUser).observe(getViewLifecycleOwner(), expenses -> {
+                    expensesContainer2.removeAllViews();
 
-            for (int i = 0; i < expenses.size(); i++) {
-                ExpensesViewModel.Expense expense = expenses.get(i);
-                if (expense.getIsOwed().equals(currentUser)) {
-                    View expenseView = inflater.inflate(R.layout.expense_layout, expensesContainer2, false);
+                    for (int i = 0; i < expenses.size(); i++) {
+                        ExpensesViewModel.Expense expense = expenses.get(i);
+                        if (expense.getIsOwed().equals(currentUser)) {
+                            View expenseView = inflater.inflate(R.layout.expense_layout, expensesContainer2, false);
 
-                    ImageView assigneeProfilePicture = expenseView.findViewById(R.id.assignee_profile_picture);
-                    TextView username = expenseView.findViewById(R.id.user_name);
-                    TextView description = expenseView.findViewById(R.id.expense_description);
-                    TextView amount = expenseView.findViewById(R.id.amount_text);
-                    Button settle = expenseView.findViewById(R.id.action_button);
+                            int finalI = i;
+                            userViewModel.getUserByMail(expense.getOwes()).observe(getViewLifecycleOwner(), otherUser -> {
+                                ImageView assigneeProfilePicture = expenseView.findViewById(R.id.assignee_profile_picture);
+                                TextView username = expenseView.findViewById(R.id.user_name);
+                                TextView description = expenseView.findViewById(R.id.expense_description);
+                                TextView amount = expenseView.findViewById(R.id.amount_text);
+                                Button settle = expenseView.findViewById(R.id.action_button);
 
-                    assigneeProfilePicture.setImageResource(R.drawable.platypus);
-                    username.setText(expense.getOwes());
-                    description.setText("owes you");
-                    amount.setText(String.format("%.2f", expense.getAmount()) + " €");
-                    settle.setText("Received");
+                                assigneeProfilePicture.setImageResource(otherUser.getProfilePicture());
+                                username.setText(otherUser.getUsername());
+                                description.setText("owes you");
+                                amount.setText(String.format("%.2f", expense.getAmount()) + " €");
+                                settle.setText("Received");
 
-                    final int position = i;
-                    settle.setOnClickListener(v -> viewModel.updateStatus(position));
+                                final int position = finalI;
+                                settle.setOnClickListener(v -> {
+                                    viewModel.updateStatus(position);
+                                    if (expense.isSettled()) {
+                                        settle.setText("Received \u2713");
+                                    } else {
+                                        settle.setText("Received");
+                                    }
+                                });
+                            });
 
-                    expensesContainer2.addView(expenseView);
-                }
+                            expensesContainer2.addView(expenseView);
+                        }
+                    }
+                });
             }
         });
 
@@ -103,81 +134,71 @@ public class ExpensesFragment extends Fragment {
     }
 
     private void showAddExpenseDialog() {
-        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.add_expense_layout, null);
-        viewModel.resetRoommateSelections();
+        userViewModel.getRoommates(currentApartmentCode).observe(getViewLifecycleOwner(), roommates -> {
+            View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.add_expense_layout, null);
 
-        EditText amountInput = dialogView.findViewById(R.id.amount_input);
-        LinearLayout roommateContainer = dialogView.findViewById(R.id.roommate_container);
-        Button submitButton = dialogView.findViewById(R.id.add_expense_confirm_button);
-        roommateContainer.removeAllViews();
+            EditText amountInput = dialogView.findViewById(R.id.amount_input);
+            LinearLayout roommateContainer = dialogView.findViewById(R.id.roommate_container);
+            Button submitButton = dialogView.findViewById(R.id.add_expense_confirm_button);
+            roommateContainer.removeAllViews();
 
-        viewModel.getRoommates().observe(getViewLifecycleOwner(), roommates -> {
-            for (ExpensesViewModel.Roommate roommate : roommates) {
-                if (roommate.getName().equals(viewModel.getCurrentUser())) {
+            List<UserViewModel.User> chosenRoommates = new ArrayList<>();
+
+            for (UserViewModel.User roommate : roommates) {
+                if (roommate.getEmail().equals(currentUser)) {
                     continue;
                 }
 
                 CheckBox checkBox = new CheckBox(requireContext());
-                checkBox.setText(roommate.getName());
+                checkBox.setText(roommate.getUsername());
                 checkBox.setTextColor(getResources().getColor(R.color.dark_red));
-                checkBox.setChecked(roommate.isSelected());
                 checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                    roommate.setSelected(isChecked);
+                    if (chosenRoommates.contains(roommate)) {
+                        chosenRoommates.remove(roommate);
+                    } else {
+                        chosenRoommates.add(roommate);
+                    }
                 });
 
                 roommateContainer.addView(checkBox);
             }
-        });
 
-        AlertDialog dialog = new AlertDialog.Builder(requireContext())
-                .setTitle("Add Expense")
-                .setView(dialogView)
-                .setNegativeButton("Cancel", (d, which) -> d.dismiss())
-                .create();
-        dialog.show();
+            AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                    .setTitle("Add Expense")
+                    .setView(dialogView)
+                    .setNegativeButton("Cancel", (d, which) -> d.dismiss())
+                    .create();
+            dialog.show();
 
-        submitButton.setOnClickListener(v -> {
-            String amountText = amountInput.getText().toString();
-            if (amountText.isEmpty()) {
-                amountInput.setError("Amount is required");
-                return;
-            }
-
-            float amount;
-            try {
-                amount = Float.parseFloat(amountText);
-            } catch (NumberFormatException e) {
-                amountInput.setError("Invalid amount");
-                return;
-            }
-
-            List<ExpensesViewModel.Roommate> allRoommates = viewModel.getRoommates().getValue();
-            boolean atLeastOneSelected = false;
-            if (allRoommates != null) {
-                int selectedRoommates = 0;
-                for (ExpensesViewModel.Roommate roommate : allRoommates) {
-                    if (roommate.isSelected()) {
-                        selectedRoommates++;
-                        atLeastOneSelected = true;
-                    }
+            submitButton.setOnClickListener(v -> {
+                String amountText = amountInput.getText().toString();
+                if (amountText.isEmpty()) {
+                    amountInput.setError("Amount is required");
+                    return;
                 }
-                for (ExpensesViewModel.Roommate roommate : allRoommates) {
-                    if (roommate.isSelected()) {
-                        viewModel.addExpense(amount / (selectedRoommates + 1), roommate.getName());
-                    }
+
+                float amount;
+                try {
+                    amount = Float.parseFloat(amountText);
+                } catch (NumberFormatException e) {
+                    amountInput.setError("Invalid amount");
+                    return;
                 }
-            }
 
-            if (!atLeastOneSelected) {
-                new AlertDialog.Builder(requireContext())
-                        .setMessage("Please select at least one roommate")
-                        .setPositiveButton("OK", (d2, which) -> d2.dismiss())
-                        .show();
-                return;
-            }
+                for (UserViewModel.User roommate : chosenRoommates) {
+                    viewModel.addExpense(currentApartmentCode, amount / (chosenRoommates.size() + 1), roommate.getEmail(), currentUser);
+                }
 
-            viewModel.resetRoommateSelections();
-            dialog.dismiss();
+                if (chosenRoommates.isEmpty()) {
+                    new AlertDialog.Builder(requireContext())
+                            .setMessage("Please select at least one roommate")
+                            .setPositiveButton("OK", (d2, which) -> d2.dismiss())
+                            .show();
+                    return;
+                }
+
+                dialog.dismiss();
+            });
         });
     }
 
