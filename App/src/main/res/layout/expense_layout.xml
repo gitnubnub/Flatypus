@@ -9,7 +9,6 @@
         android:id="@+id/assignee_profile_picture"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:src="@drawable/platypus"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
@@ -18,7 +17,6 @@
         android:id="@+id/user_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="user"
         android:textColor="@color/dark_red"
         android:textSize="13sp"
         app:layout_constraintStart_toStartOf="@id/assignee_profile_picture"
@@ -30,7 +28,6 @@
         android:layout_width="277dp"
         android:layout_height="25dp"
         android:layout_margin="8dp"
-        android:text="owe"
         android:textColor="@color/dark_red"
         android:textSize="16sp"
         android:gravity="center"
@@ -43,7 +40,6 @@
         android:id="@+id/amount_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="€"
         android:textColor="@color/dark_red"
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="@id/action_button"
@@ -58,6 +54,7 @@
         android:text="Settle"
         android:textColor="@color/dark_red"
         android:backgroundTint="@color/lion"
+        android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 

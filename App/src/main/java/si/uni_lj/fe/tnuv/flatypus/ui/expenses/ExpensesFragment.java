@@ -1,5 +1,8 @@
 package si.uni_lj.fe.tnuv.flatypus.ui.expenses;
 
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.app.AlertDialog;
@@ -68,16 +71,17 @@ public class ExpensesFragment extends Fragment {
                                 username.setText(otherUser.getUsername());
                                 description.setText("you owe");
                                 amount.setText(String.format("%.2f", expense.getAmount()) + " €");
-                                settle.setText("Settled");
+
+                                if (expense.isSettled()) {
+                                    settle.setText("Settled ✓");
+                                } else {
+                                    settle.setText("Settled");
+                                }
+                                settle.setVisibility(View.VISIBLE);
 
                                 final int position = finalI;
                                 settle.setOnClickListener(v -> {
                                     viewModel.updateStatus(position);
-                                    if (expense.isSettled()) {
-                                        settle.setText("Settled \u2713");
-                                    } else {
-                                        settle.setText("Settled");
-                                    }
                                 });
                             });
 
@@ -108,16 +112,17 @@ public class ExpensesFragment extends Fragment {
                                 username.setText(otherUser.getUsername());
                                 description.setText("owes you");
                                 amount.setText(String.format("%.2f", expense.getAmount()) + " €");
-                                settle.setText("Received");
+
+                                if (expense.isSettled()) {
+                                    settle.setText("Received ✓");
+                                } else {
+                                    settle.setText("Received");
+                                }
+                                settle.setVisibility(View.VISIBLE);
 
                                 final int position = finalI;
                                 settle.setOnClickListener(v -> {
                                     viewModel.updateStatus(position);
-                                    if (expense.isSettled()) {
-                                        settle.setText("Received \u2713");
-                                    } else {
-                                        settle.setText("Received");
-                                    }
                                 });
                             });
 
@@ -128,78 +133,88 @@ public class ExpensesFragment extends Fragment {
             }
         });
 
-        binding.addExpenseButton.setOnClickListener(v -> showAddExpenseDialog());
+        binding.addExpenseButton.setOnClickListener(v -> {
+            userViewModel.getRoommates(currentApartmentCode).observe(getViewLifecycleOwner(), roommates -> {
+                if (roommates != null && !roommates.isEmpty()) {
+                    showAddExpenseDialog(roommates);
+                }
+            });
+        });
 
         return root;
     }
 
-    private void showAddExpenseDialog() {
-        userViewModel.getRoommates(currentApartmentCode).observe(getViewLifecycleOwner(), roommates -> {
-            View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.add_expense_layout, null);
+    private void showAddExpenseDialog(List<UserViewModel.User> roommates) {
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.add_expense_layout, null);
 
-            EditText amountInput = dialogView.findViewById(R.id.amount_input);
-            LinearLayout roommateContainer = dialogView.findViewById(R.id.roommate_container);
-            Button submitButton = dialogView.findViewById(R.id.add_expense_confirm_button);
-            roommateContainer.removeAllViews();
+        EditText amountInput = dialogView.findViewById(R.id.amount_input);
+        LinearLayout roommateContainer = dialogView.findViewById(R.id.roommate_container);
+        Button submitButton = dialogView.findViewById(R.id.add_expense_confirm_button);
+        roommateContainer.removeAllViews();
 
-            List<UserViewModel.User> chosenRoommates = new ArrayList<>();
+        List<UserViewModel.User> chosenRoommates = new ArrayList<>();
 
-            for (UserViewModel.User roommate : roommates) {
-                if (roommate.getEmail().equals(currentUser)) {
-                    continue;
-                }
-
-                CheckBox checkBox = new CheckBox(requireContext());
-                checkBox.setText(roommate.getUsername());
-                checkBox.setTextColor(getResources().getColor(R.color.dark_red));
-                checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                    if (chosenRoommates.contains(roommate)) {
-                        chosenRoommates.remove(roommate);
-                    } else {
-                        chosenRoommates.add(roommate);
-                    }
-                });
-
-                roommateContainer.addView(checkBox);
+        for (UserViewModel.User roommate : roommates) {
+            if (roommate.getEmail().equals(currentUser)) {
+                continue;
             }
 
-            AlertDialog dialog = new AlertDialog.Builder(requireContext())
-                    .setTitle("Add Expense")
-                    .setView(dialogView)
-                    .setNegativeButton("Cancel", (d, which) -> d.dismiss())
-                    .create();
-            dialog.show();
-
-            submitButton.setOnClickListener(v -> {
-                String amountText = amountInput.getText().toString();
-                if (amountText.isEmpty()) {
-                    amountInput.setError("Amount is required");
-                    return;
+            CheckBox checkBox = new CheckBox(requireContext());
+            checkBox.setText(roommate.getUsername());
+            checkBox.setTextColor(getResources().getColor(R.color.dark_red));
+            checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (chosenRoommates.contains(roommate)) {
+                    chosenRoommates.remove(roommate);
+                } else {
+                    chosenRoommates.add(roommate);
                 }
-
-                float amount;
-                try {
-                    amount = Float.parseFloat(amountText);
-                } catch (NumberFormatException e) {
-                    amountInput.setError("Invalid amount");
-                    return;
-                }
-
-                for (UserViewModel.User roommate : chosenRoommates) {
-                    viewModel.addExpense(currentApartmentCode, amount / (chosenRoommates.size() + 1), roommate.getEmail(), currentUser);
-                }
-
-                if (chosenRoommates.isEmpty()) {
-                    new AlertDialog.Builder(requireContext())
-                            .setMessage("Please select at least one roommate")
-                            .setPositiveButton("OK", (d2, which) -> d2.dismiss())
-                            .show();
-                    return;
-                }
-
-                dialog.dismiss();
             });
+
+            roommateContainer.addView(checkBox);
+        }
+
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                .setTitle("Add Expense")
+                .setView(dialogView)
+                .setNegativeButton("Cancel", (d, which) -> d.dismiss())
+                .create();
+        dialog.show();
+
+        submitButton.setOnClickListener(v -> {
+            String amountText = amountInput.getText().toString();
+            if (amountText.isEmpty()) {
+                amountInput.setError("Amount is required");
+                return;
+            }
+
+            float amount;
+            try {
+                amount = Float.parseFloat(amountText);
+            } catch (NumberFormatException e) {
+                amountInput.setError("Invalid amount");
+                return;
+            }
+
+            for (UserViewModel.User roommate : chosenRoommates) {
+                viewModel.addExpense(currentApartmentCode, amount / (chosenRoommates.size() + 1), roommate.getEmail(), currentUser);
+            }
+
+            if (chosenRoommates.isEmpty()) {
+                new AlertDialog.Builder(requireContext())
+                        .setMessage("Please select at least one roommate")
+                        .setPositiveButton("OK", (d2, which) -> d2.dismiss())
+                        .show();
+                return;
+            }
+
+            dialog.dismiss();
         });
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        viewModel.cleanupSettledExpenses(currentApartmentCode);
     }
 
     @Override

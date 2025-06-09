@@ -59,6 +59,7 @@ public class ShoppingListFragment extends Fragment {
                         final int position = i;
                         itemCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
                             showPriceInputDialog(position, user);
+                            itemCheckbox.setChecked(shoppingItem.isChecked());
                         });
 
                         shoppingListContainer.addView(itemView);
@@ -97,7 +98,7 @@ public class ShoppingListFragment extends Fragment {
 
                     userViewModel.getRoommates(currentApartmentCode).observe(getViewLifecycleOwner(), roommates -> {
                         for (UserViewModel.User roommate : roommates) {
-                            if (roommate.getEmail() != currentUser.getEmail()) {
+                            if (!currentUser.getEmail().equals(roommate.getEmail())) {
                                 expViewModel.addExpense(currentApartmentCode, price / roommates.size(), roommate.getEmail(), currentUser.getEmail());
                             }
                         }
@@ -140,6 +141,12 @@ public class ShoppingListFragment extends Fragment {
                 itemNameInput.setError("Item name cannot be empty");
             }
         });
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        viewModel.cleanupBoughtItems(currentApartmentCode);
     }
 
     @Override

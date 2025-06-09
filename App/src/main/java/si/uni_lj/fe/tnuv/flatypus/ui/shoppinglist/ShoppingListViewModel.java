@@ -36,11 +36,7 @@ public class ShoppingListViewModel extends ViewModel {
                     for (DataSnapshot itemSnapshot : snapshot.getChildren()) {
                         ShoppingItem item = itemSnapshot.getValue(ShoppingItem.class);
                         if (item != null) {
-                            if (item.isChecked()) {
-                                itemSnapshot.getRef().removeValue();
-                            } else {
-                                itemList.add(item);
-                            }
+                            itemList.add(item);
                         }
                     }
                     shoppingItems.setValue(itemList);
@@ -57,9 +53,10 @@ public class ShoppingListViewModel extends ViewModel {
     }
 
     public void addItem(String itemName, String apartmentCode) {
-        ShoppingItem newItem = new ShoppingItem(itemName, apartmentCode, false);
+        ShoppingItem newItem = new ShoppingItem("", itemName, apartmentCode, false);
         String itemId = databaseReference.push().getKey();
         if (itemId != null) {
+            newItem.setId(itemId);
             databaseReference.child(itemId).setValue(newItem)
                     .addOnSuccessListener(aVoid ->
                             Log.d("Shopping", "Item added successfully")
@@ -73,27 +70,66 @@ public class ShoppingListViewModel extends ViewModel {
         List<ShoppingItem> currentList = shoppingItems.getValue();
         if (currentList != null && position >= 0 && position < currentList.size()) {
             ShoppingItem item = currentList.get(position);
-            item.setChecked(!item.isChecked());
+
+            boolean newStatus = !item.isChecked();
+            item.setChecked(newStatus);
             shoppingItems.setValue(currentList);
+
+            String itemId = item.getId();
+            if (itemId != null && !itemId.isEmpty()) {
+                databaseReference.child(itemId).child("checked").setValue(newStatus)
+                        .addOnSuccessListener(aVoid ->
+                                Log.d("Items", "Status updated in Firebase.")
+                        ).addOnFailureListener(e ->
+                                Log.e("Items", "Failed to update status: " + e.getMessage())
+                        );
+            } else {
+                Log.e("Items", "Item ID missing. Cannot update Firebase.");
+            }
         }
     }
 
+    public void cleanupBoughtItems(String apartment) {
+        databaseReference.orderByChild("apartment").equalTo(apartment)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for (DataSnapshot itemSnapshot : snapshot.getChildren()) {
+                            ShoppingItem item = itemSnapshot.getValue(ShoppingItem.class);
+                            if (item != null && item.isChecked()) {
+                                itemSnapshot.getRef().removeValue();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.e("Items", "Cleanup failed: " + error.getMessage());
+                    }
+                });
+    }
+
     public static class ShoppingItem {
+        private String id;
         private String name;
         private String apartment;
         private boolean isChecked;
 
         public ShoppingItem() {}
 
-        public ShoppingItem(String name, String apartment, boolean isChecked) {
+        public ShoppingItem(String id, String name, String apartment, boolean isChecked) {
+            this.id = id;
             this.name = name;
             this.apartment = apartment;
             this.isChecked = isChecked;
         }
 
+        public String getId() { return id; }
         public String getName() { return name; }
         public String getApartment() { return apartment; }
         public boolean isChecked() { return isChecked; }
         public void setChecked(boolean checked) { this.isChecked = checked; }
+
+        public void setId(String id) { this.id = id; }
     }
 }
