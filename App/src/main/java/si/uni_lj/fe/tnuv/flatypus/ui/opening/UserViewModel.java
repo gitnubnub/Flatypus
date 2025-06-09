@@ -65,7 +65,7 @@ public class UserViewModel extends ViewModel {
 
     private MutableLiveData<User> currentUser = new MutableLiveData<>();
     private MutableLiveData<Boolean> isLoggedIn = new MutableLiveData<>(false);
-    private DatabaseReference databaseReference;
+    private static DatabaseReference databaseReference;
 
     public UserViewModel() {
         FirebaseDatabase database = FirebaseDatabase.getInstance("https://flatypus-fde01-default-rtdb.europe-west1.firebasedatabase.app");
@@ -80,7 +80,7 @@ public class UserViewModel extends ViewModel {
         return isLoggedIn;
     }
 
-    public LiveData<User> getUserByMail(String email) {
+    public static LiveData<User> getUserByMail(String email) {
         MutableLiveData<User> userLiveData = new MutableLiveData<>();
 
         databaseReference.orderByChild("email").equalTo(email)

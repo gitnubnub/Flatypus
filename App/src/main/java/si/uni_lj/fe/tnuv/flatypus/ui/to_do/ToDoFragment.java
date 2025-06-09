@@ -35,10 +35,10 @@ public class ToDoFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        toDoViewModel = new ViewModelProvider(this).get(si.uni_lj.fe.tnuv.flatypus.ui.to_do.ToDoViewModel.class);
-        userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
-
+        toDoViewModel = new ViewModelProvider(this).get(ToDoViewModel.class);        userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
         binding = FragmentToDoBinding.inflate(inflater, container, false);
+
+        toDoViewModel.initializeWithUserViewModel(userViewModel);
         View root = binding.getRoot();
 
         LinearLayout todoListContainer = binding.todoListContainer;

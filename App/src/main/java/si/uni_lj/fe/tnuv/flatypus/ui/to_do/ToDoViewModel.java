@@ -54,26 +54,48 @@ public class ToDoViewModel extends ViewModel {
     private final MutableLiveData<List<Task>> tasks = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<Integer> notificationCount = new MutableLiveData<>(0);
     private final MutableLiveData<List<String>> roommates = new MutableLiveData<>(new ArrayList<>());
-    private final String currentUser = "Eva"; // Replace with dynamic source if needed
+    private String currentUser = "Eva"; // Replace with dynamic source if needed
     private DatabaseReference databaseReference;
     private String currentApartmentCode = ""; // Will be set from UserViewModel
+    private UserViewModel userViewModel;
 
 
     public ToDoViewModel() {
         FirebaseDatabase database = FirebaseDatabase.getInstance("https://flatypus-fde01-default-rtdb.europe-west1.firebasedatabase.app");
         databaseReference = database.getReference();
+    }
 
-        // Listen for current user changes to update apartment and roommates
-        si.uni_lj.fe.tnuv.flatypus.ui.opening.UserViewModel userViewModel = new si.uni_lj.fe.tnuv.flatypus.ui.opening.UserViewModel();
+    // Setter to initialize with shared UserViewModel
+    public void initializeWithUserViewModel(UserViewModel userViewModel) {
+        this.userViewModel = userViewModel;
         userViewModel.getCurrentUser().observeForever(user -> {
             if (user != null) {
-                currentApartmentCode = user.getCurrentApartment();
+                currentUser = user.getUsername(); // Update current user
+                currentApartmentCode = user.getCurrentApartment(); // Update apartment code
+                Log.d("ToDoViewModel", "Current user: " + currentUser + ", apartment: " + currentApartmentCode);
+                if (!currentApartmentCode.isEmpty()) {
+                    fetchRoommates();
+                    fetchTasks();
+                } else {
+                    Log.w("ToDoViewModel", "currentApartmentCode is empty, skipping fetch");
+                }
+            } else {
+                Log.w("ToDoViewModel", "currentUser is null");
+            }
+        });
+
+        // Initial check
+        UserViewModel.User initialUser = userViewModel.getCurrentUser().getValue();
+        if (initialUser != null) {
+            currentUser = initialUser.getUsername();
+            currentApartmentCode = initialUser.getCurrentApartment();
+            Log.d("ToDoViewModel", "Initial user: " + currentUser + ", apartment: " + currentApartmentCode);
+            if (!currentApartmentCode.isEmpty()) {
                 fetchRoommates();
                 fetchTasks();
             }
-        });
+        }
     }
-
     public LiveData<List<Task>> getTasks() {
         return tasks;
     }
@@ -167,7 +189,10 @@ public class ToDoViewModel extends ViewModel {
     }
 
     private void fetchRoommates() {
-        if (currentApartmentCode.isEmpty()) return;
+        if (currentApartmentCode.isEmpty()) {
+            Log.w("FetchRoommates", "currentApartmentCode is empty, skipping fetch");
+            return;
+        }
 
         databaseReference.child("users").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -188,9 +213,11 @@ public class ToDoViewModel extends ViewModel {
             }
         });
     }
-
     private void fetchTasks() {
-        if (currentApartmentCode.isEmpty()) return;
+        if (currentApartmentCode.isEmpty()) {
+            Log.w("FetchTasks", "currentApartmentCode is empty, skipping fetch");
+            return;
+        }
 
         databaseReference.child("tasks").orderByChild("apartmentCode").equalTo(currentApartmentCode)
                 .addValueEventListener(new ValueEventListener() {
