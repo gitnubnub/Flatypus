@@ -35,7 +35,7 @@ public class UserViewModel extends ViewModel {
             this.password = password;
             this.profilePicture = profilePicture;
             this.notifications = notifications;
-            this.apartments = apartments;
+            this.apartments = apartments != null ? apartments : new ArrayList<>();
             this.currentApartment = currentApartment;
         }
 
@@ -55,7 +55,7 @@ public class UserViewModel extends ViewModel {
             return notifications;
         }
         public List<String> getApartments() {
-            return apartments;
+            return apartments != null ? apartments : new ArrayList<>();
         }
         public String getCurrentApartment() {
             return currentApartment;
@@ -179,6 +179,84 @@ public class UserViewModel extends ViewModel {
                     });
 
             isLoggedIn.setValue(true);
+        }
+    }
+
+    public void changeProfilePicture(int newProfilePicture) {
+        User current = currentUser.getValue();
+        if (current != null) {
+            current.profilePicture = newProfilePicture;
+            currentUser.setValue(current);
+
+            databaseReference.orderByChild("email").equalTo(current.getEmail())
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            for (DataSnapshot userSnapshot : snapshot.getChildren()) {
+                                userSnapshot.getRef().child("profilePicture").setValue(newProfilePicture)
+                                        .addOnSuccessListener(aVoid -> Log.d("ChangeProfilePicture", "Profile picture updated"))
+                                        .addOnFailureListener(e -> Log.e("ChangeProfilePicture", "Failed to update profile picture: " + e.getMessage()));
+                                break;
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            Log.e("ChangeProfilePicture", "Database error: " + error.getMessage());
+                        }
+                    });
+        }
+    }
+
+    public void changeUsername(String newUsername) {
+        User current = currentUser.getValue();
+        if (current != null) {
+            current.username = newUsername;
+            currentUser.setValue(current);
+
+            databaseReference.orderByChild("email").equalTo(current.getEmail())
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            for (DataSnapshot userSnapshot : snapshot.getChildren()) {
+                                userSnapshot.getRef().child("username").setValue(newUsername)
+                                        .addOnSuccessListener(aVoid -> Log.d("ChangeUsername", "Username updated"))
+                                        .addOnFailureListener(e -> Log.e("ChangeUsername", "Failed to update username: " + e.getMessage()));
+                                break;
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            Log.e("ChangeUsername", "Database error: " + error.getMessage());
+                        }
+                    });
+        }
+    }
+
+    public void toggleNotifications(boolean isEnabled) {
+        User current = currentUser.getValue();
+        if (current != null) {
+            current.notifications = isEnabled;
+            currentUser.setValue(current);
+
+            databaseReference.orderByChild("email").equalTo(current.getEmail())
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            for (DataSnapshot userSnapshot : snapshot.getChildren()) {
+                                userSnapshot.getRef().child("notifications").setValue(isEnabled)
+                                        .addOnSuccessListener(aVoid -> Log.d("ToggleNotifications", "Notifications updated to " + isEnabled))
+                                        .addOnFailureListener(e -> Log.e("ToggleNotifications", "Failed to update notifications: " + e.getMessage()));
+                                break;
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            Log.e("ToggleNotifications", "Database error: " + error.getMessage());
+                        }
+                    });
         }
     }
 }
