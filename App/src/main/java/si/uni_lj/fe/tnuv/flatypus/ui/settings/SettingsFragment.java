@@ -198,9 +198,9 @@ public class SettingsFragment extends Fragment {
                 .setTitle("Are you sure?")
                 .setMessage("Do you want to log out?")
                 .setPositiveButton("Yes", (dialog, which) -> {
-                    // Implement leave apartment logic here
+                    viewModel.logout();
                     Toast.makeText(requireContext(), "Logged out", Toast.LENGTH_SHORT).show();
-                    Navigation.findNavController(requireView()).navigate(R.id.action_nav_settings_to_nav_opening);                })
+                })
                 .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
                 .show();
     }
