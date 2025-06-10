@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         applicationId = "si.uni_lj.fe.tnuv.flatypus"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34 // Typically matches compileSdk or is close to it (35 is very new, ensure it's what you intend)
         versionCode = 1
         versionName = "1.0"
