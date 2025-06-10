@@ -1,6 +1,8 @@
 package si.uni_lj.fe.tnuv.flatypus.ui.home;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,9 +50,8 @@ public class HomeFragment extends Fragment {
             Navigation.findNavController(v).navigate(R.id.action_nav_home_to_nav_notifications);
         });
 
-
         // Initialize heart calculation with user and shopping data
-        initHeartCalculation(homeViewModel, userViewModel, shoppingViewModel, toDoViewModel, expensesViewModel);
+        homeViewModel.initHeartCalculation(requireContext(), userViewModel, shoppingViewModel, toDoViewModel, expensesViewModel);
 
         // Hearts in an arc
         ConstraintLayout layout = (ConstraintLayout) root;
@@ -131,31 +132,7 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    public void initHeartCalculation(HomeViewModel homeViewModel,UserViewModel userViewModel, ShoppingListViewModel shoppingViewModel, ToDoViewModel toDoViewModel, ExpensesViewModel expensesViewModel) {
-        userViewModel.getCurrentUser().observeForever(new Observer<UserViewModel.User>() {
-            @Override
-            public void onChanged(UserViewModel.User user) {
-                if (user != null) {
-                    String currentApartment = user.getCurrentApartment();
-                    String currentUserEmail = user.getEmail();
-                    if (currentApartment != null && !currentApartment.isEmpty()) {
-                        // Trigger task fetch to ensure data is available
-                        toDoViewModel.fetchTasks(currentApartment);
-                        // Set up observations
-                        homeViewModel.observeShoppingItems(shoppingViewModel, currentApartment);
-                        homeViewModel.observeTasks(toDoViewModel, currentUserEmail, currentApartment);
-                        homeViewModel.observeOwedExpenses(expensesViewModel, currentApartment, currentUserEmail);
-                        // Combine counts when both are available
-                        homeViewModel.combineCounts();
-                    } else {
-                        homeViewModel.calculateHeartCount(0, 0f, 0); // Default to 0 shopping items if no apartment
-                    }
-                } else {
-                    homeViewModel.calculateHeartCount(0, 0f, 0); // Default if no user
-                }
-            }
-        });
-    }
+
 
     @Override
     public void onDestroyView() {
