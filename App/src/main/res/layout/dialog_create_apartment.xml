@@ -12,7 +12,6 @@
         android:hint="Enter apartment name"
         android:padding="8dp"
         android:textColor="#4A2C2A"
-        android:textSize="16sp"
-        android:inputType="textCapCharacters" />
+        android:textSize="16sp" />
 
 </LinearLayout>
