@@ -85,6 +85,7 @@ public class UserViewModel extends ViewModel {
 
     private MutableLiveData<User> currentUser = new MutableLiveData<>();
     private MutableLiveData<Boolean> isLoggedIn = new MutableLiveData<>(false);
+    private MutableLiveData<Boolean> correctLoginInput = new MutableLiveData<>(true);
     private static DatabaseReference databaseReference;
     private static DatabaseReference apartmentsReference;
     private MutableLiveData<String> apartmentFetchResult = new MutableLiveData<>();
@@ -101,6 +102,14 @@ public class UserViewModel extends ViewModel {
 
     public LiveData<Boolean> isLoggedIn() {
         return isLoggedIn;
+    }
+
+    public LiveData<Boolean> correctLoginInput() {
+        return correctLoginInput;
+    }
+
+    public void setCorrectLoginInput(boolean value) {
+        correctLoginInput.setValue(value);
     }
 
     public static LiveData<User> getUserByMail(String email) {
@@ -175,10 +184,13 @@ public class UserViewModel extends ViewModel {
                         isLoggedIn.setValue(true);
                         found = true;
                         break;
+                    } else {
+                        correctLoginInput.setValue(false);
                     }
                 }
                 if (!found) {
                     isLoggedIn.setValue(false);
+                    correctLoginInput.setValue(false);
                 }
             }
 
