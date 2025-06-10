@@ -30,6 +30,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -143,11 +144,24 @@ public class SettingsFragment extends Fragment {
     }
 
     private void fetchAndUpdateApartments(List<String> apartmentCodes) {
-        userApartments.clear();
+        userApartments.clear(); // Clear the list to start fresh
+        if (apartmentCodes == null || apartmentCodes.isEmpty()) return;
+
         for (String code : apartmentCodes) {
-            // For now, create a basic Apartment object with just the code
-            // You can expand this with a database query to fetch apartment details if needed
-            userApartments.add(new Apartment("Apartment with code " + code, code, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
+            // Use LiveData to fetch the apartment name
+            viewModel.getApartmentNameByCode(code).observeForever(name -> {
+                if (name != null && !name.isEmpty()) {
+                    // Check if an apartment with this code already exists
+                    boolean apartmentExists = userApartments.stream().anyMatch(apartment ->
+                            apartment.getCode() != null && apartment.getCode().equals(code)
+                    );
+                    if (!apartmentExists) {
+                        // Create and add a new Apartment object only if it doesn't exist
+                        userApartments.add(new Apartment(name, code, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
+                    }
+                }
+                // Note: No notifyDataSetChanged here since adapter isn't passed
+            });
         }
     }
 
@@ -184,7 +198,7 @@ public class SettingsFragment extends Fragment {
                 .setMessage("Do you want to leave the apartment?")
                 .setPositiveButton("Yes", (dialog, which) -> {
                     // Implement leave apartment logic here (e.g., clear currentApartment)
-                    viewModel.addApartment(""); // This will clear currentApartment
+                    viewModel.fetchApartment(""); // This will clear currentApartment
                     currentApartmentCode = "";
                     binding.apartmentCode.setText(currentApartmentCode);
                     Toast.makeText(requireContext(), "Apartment left", Toast.LENGTH_SHORT).show();
@@ -250,6 +264,7 @@ public class SettingsFragment extends Fragment {
         View view = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_apartments, null);
         ListView listView = view.findViewById(R.id.apartments_list);
         Button addApartmentButton = view.findViewById(R.id.add_apartment_button);
+        Button createApartmentButton = view.findViewById(R.id.create_apartment_button);
 
         // Set up the adapter
         ApartmentAdapter adapter = new ApartmentAdapter(requireContext(), userApartments);
@@ -257,7 +272,7 @@ public class SettingsFragment extends Fragment {
 
         // Handle "Add Apartment" button click
         addApartmentButton.setOnClickListener(v -> showAddApartmentDialog(adapter));
-
+        createApartmentButton.setOnClickListener(v -> showCreateApartmentDialog(adapter));
         builder.setView(view)
                 .setNegativeButton("Close", (dialog, which) -> dialog.dismiss());
 
@@ -279,7 +294,7 @@ public class SettingsFragment extends Fragment {
                         Toast.makeText(requireContext(), "Please enter a code", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    viewModel.addApartment(code);
+                    viewModel.fetchApartment(code);
                     fetchAndUpdateApartments(viewModel.getCurrentUser().getValue().getApartments());
                     adapter.notifyDataSetChanged();
                     currentApartmentCode = code; // Update current apartment code
@@ -292,6 +307,45 @@ public class SettingsFragment extends Fragment {
         dialog.show();
     }
 
+    private void showCreateApartmentDialog(ApartmentAdapter adapter) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Create Apartment");
+
+        View view = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_create_apartment, null);
+        EditText nameInput = view.findViewById(R.id.apartment_name_input);
+
+        builder.setView(view)
+                .setPositiveButton("Create", (dialog, which) -> {
+                    String name = nameInput.getText().toString();
+                    if (name.isEmpty()) {
+                        Toast.makeText(requireContext(), "Please enter a name", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    String code = generateRandomString();
+                    viewModel.addApartment(code, name);
+                    fetchAndUpdateApartments(viewModel.getCurrentUser().getValue().getApartments());
+                    adapter.notifyDataSetChanged();
+                    currentApartmentCode = code; // Update current apartment code
+                    binding.apartmentCode.setText(currentApartmentCode);
+                    Toast.makeText(requireContext(), "Joined apartment with code " + code, Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    public static String generateRandomString() {
+        final SecureRandom random = new SecureRandom();
+        final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+        StringBuilder sb = new StringBuilder(5);
+        for (int i = 0; i < 5; i++) {
+            int index = random.nextInt(CHARACTERS.length());
+            sb.append(CHARACTERS.charAt(index));
+        }
+        return sb.toString();
+    }
     @Override
     public void onDestroyView() {
         super.onDestroyView();

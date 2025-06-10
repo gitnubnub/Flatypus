@@ -22,4 +22,12 @@
         android:text="Add Apartment"
         android:textColor="#4A2C2A" />
 
+    <Button
+        android:id="@+id/create_apartment_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/button_background"
+        android:text="Create Apartment"
+        android:textColor="#4A2C2A" />
 </LinearLayout>

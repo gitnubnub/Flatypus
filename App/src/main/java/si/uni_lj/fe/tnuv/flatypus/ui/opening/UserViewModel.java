@@ -63,13 +63,35 @@ public class UserViewModel extends ViewModel {
         }
     }
 
+    public static class Apartment {
+        private String name;
+        private String code;
+
+        public Apartment() {}
+
+        public Apartment(String name, String code) {
+            this.name = name;
+            this.code = code;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getCode() {
+            return code;
+        }
+    }
+
     private MutableLiveData<User> currentUser = new MutableLiveData<>();
     private MutableLiveData<Boolean> isLoggedIn = new MutableLiveData<>(false);
     private static DatabaseReference databaseReference;
+    private static DatabaseReference apartmentsReference;
 
     public UserViewModel() {
         FirebaseDatabase database = FirebaseDatabase.getInstance("https://flatypus-fde01-default-rtdb.europe-west1.firebasedatabase.app");
         databaseReference = database.getReference("users");
+        apartmentsReference = database.getReference("apartments");
     }
 
     public LiveData<User> getCurrentUser() {
@@ -208,7 +230,7 @@ public class UserViewModel extends ViewModel {
         isLoggedIn.setValue(false);
     }
 
-    public void addApartment(String apartmentCode) {
+    public void addApartment(String apartmentCode, String apartmentName) {
         User current = currentUser.getValue();
         if (current != null) {
             List<String> currentApartments = current.getApartments();
@@ -217,27 +239,131 @@ public class UserViewModel extends ViewModel {
 
             currentUser.setValue(current);
 
-            databaseReference.orderByChild("email").equalTo(current.getEmail())
-                    .addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            for (DataSnapshot userSnapshot : snapshot.getChildren()) {
-                                userSnapshot.getRef().child("apartments").setValue(currentApartments);
-                                userSnapshot.getRef().child("currentApartment").setValue(apartmentCode);
-                                break;
-                            }
-                        }
+            // Create a new apartment object
+            String apartmentId = apartmentsReference.push().getKey();
+            if (apartmentId != null) {
+                Apartment newApartment = new Apartment(apartmentName, apartmentCode);
+                apartmentsReference.child(apartmentId).setValue(newApartment)
+                        .addOnSuccessListener(aVoid -> {
+                            Log.d("AddApartment", "Apartment created with ID: " + apartmentId);
+                            // Update user with the apartment reference
+                            databaseReference.orderByChild("email").equalTo(current.getEmail())
+                                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            for (DataSnapshot userSnapshot : snapshot.getChildren()) {
+                                                userSnapshot.getRef().child("apartments").setValue(currentApartments)
+                                                        .addOnSuccessListener(aVoid2 -> Log.d("AddApartment", "User apartments updated"))
+                                                        .addOnFailureListener(e -> Log.e("AddApartment", "Failed to update user apartments: " + e.getMessage()));
+                                                userSnapshot.getRef().child("currentApartment").setValue(apartmentCode)
+                                                        .addOnSuccessListener(aVoid2 -> Log.d("AddApartment", "Current apartment updated"))
+                                                        .addOnFailureListener(e -> Log.e("AddApartment", "Failed to update current apartment: " + e.getMessage()));
+                                                break;
+                                            }
+                                        }
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-                            Log.e("UserViewModel", "Database error: " + error.getMessage());
-                        }
-                    });
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+                                            Log.e("AddApartment", "Database error: " + error.getMessage());
+                                        }
+                                    });
+                        })
+                        .addOnFailureListener(e -> Log.e("AddApartment", "Failed to create apartment: " + e.getMessage()));
+            } else {
+                Log.e("AddApartment", "Failed to generate apartment ID.");
+            }
 
             isLoggedIn.setValue(true);
         }
     }
 
+    public void fetchApartment(String apartmentCode) {
+        User current = currentUser.getValue();
+        if (current != null) {
+            apartmentsReference.orderByChild("code").equalTo(apartmentCode)
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            boolean found = false;
+                            for (DataSnapshot apartmentSnapshot : snapshot.getChildren()) {
+                                Apartment apartment = apartmentSnapshot.getValue(Apartment.class);
+                                if (apartment != null) {
+                                    found = true;
+                                    List<String> currentApartments = current.getApartments();
+                                    if (!currentApartments.contains(apartmentCode)) {
+                                        currentApartments.add(apartmentCode);
+                                        current.currentApartment = apartmentCode;
+                                        currentUser.setValue(current);
+
+                                        // Update user in database
+                                        databaseReference.orderByChild("email").equalTo(current.getEmail())
+                                                .addListenerForSingleValueEvent(new ValueEventListener() {
+                                                    @Override
+                                                    public void onDataChange(@NonNull DataSnapshot userSnapshot) {
+                                                        for (DataSnapshot userData : userSnapshot.getChildren()) {
+                                                            userData.getRef().child("apartments").setValue(currentApartments)
+                                                                    .addOnSuccessListener(aVoid -> Log.d("FetchApartment", "User apartments updated"))
+                                                                    .addOnFailureListener(e -> Log.e("FetchApartment", "Failed to update user apartments: " + e.getMessage()));
+                                                            userData.getRef().child("currentApartment").setValue(apartmentCode)
+                                                                    .addOnSuccessListener(aVoid -> Log.d("FetchApartment", "Current apartment updated"))
+                                                                    .addOnFailureListener(e -> Log.e("FetchApartment", "Failed to update current apartment: " + e.getMessage()));
+                                                            break;
+                                                        }
+                                                    }
+
+                                                    @Override
+                                                    public void onCancelled(@NonNull DatabaseError error) {
+                                                        Log.e("FetchApartment", "Database error: " + error.getMessage());
+                                                    }
+                                                });
+                                    } else {
+                                        Log.d("FetchApartment", "User already in apartment with code: " + apartmentCode);
+                                    }
+                                    break;
+                                }
+                            }
+                            if (!found) {
+                                Log.w("FetchApartment", "No apartment found with code: " + apartmentCode);
+                                // Optionally, notify the UI (e.g., via a callback or LiveData)
+                            }
+                            isLoggedIn.setValue(true); // Ensure login state is maintained
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            Log.e("FetchApartment", "Database error: " + error.getMessage());
+                        }
+                    });
+        }
+    }
+
+    // New method to get apartment name by code
+    public LiveData<String> getApartmentNameByCode(String apartmentCode) {
+        MutableLiveData<String> apartmentNameLiveData = new MutableLiveData<>("");
+
+        apartmentsReference.orderByChild("code").equalTo(apartmentCode)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for (DataSnapshot apartmentSnapshot : snapshot.getChildren()) {
+                            Apartment apartment = apartmentSnapshot.getValue(Apartment.class);
+                            if (apartment != null) {
+                                apartmentNameLiveData.setValue(apartment.getName());
+                                return;
+                            }
+                        }
+                        apartmentNameLiveData.setValue(""); // Return empty string if not found
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.e("GetApartmentName", "Database error: " + error.getMessage());
+                        apartmentNameLiveData.setValue("");
+                    }
+                });
+
+        return apartmentNameLiveData;
+    }
     public void changeProfilePicture(int newProfilePicture) {
         User current = currentUser.getValue();
         if (current != null) {
