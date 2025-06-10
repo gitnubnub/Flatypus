@@ -8,9 +8,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
-import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -57,7 +55,10 @@ public class RegisterFragment  extends Fragment {
             String password = passwordInput.getText().toString().trim();
 
             if (username.isEmpty() || email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(requireContext(), "Please fill all fields", Toast.LENGTH_SHORT).show();
+                new AlertDialog.Builder(requireContext())
+                        .setMessage("Please fill all fields")
+                        .setPositiveButton("OK", (d2, which) -> d2.dismiss())
+                        .show();
                 return;
             }
 
@@ -95,7 +96,6 @@ public class RegisterFragment  extends Fragment {
                     if (selectedPosition != -1) {
                         currentProfilePicture = profilePictures[selectedPosition];
                         binding.profilePicture.setImageResource(currentProfilePicture);
-                        Toast.makeText(requireContext(), "Profile picture updated", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
