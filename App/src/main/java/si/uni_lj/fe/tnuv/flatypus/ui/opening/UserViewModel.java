@@ -336,6 +336,8 @@ public class UserViewModel extends ViewModel {
                             apartmentFetchResult.setValue(null);
                         }
                     });
+
+            isLoggedIn.setValue(true);
         }
     }
     // New method to get apartment name by code

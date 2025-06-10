@@ -17,9 +17,6 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-
 import si.uni_lj.fe.tnuv.flatypus.R;
 import si.uni_lj.fe.tnuv.flatypus.databinding.FragmentRegisterBinding;
 import si.uni_lj.fe.tnuv.flatypus.ui.settings.ProfilePictureAdapter;
@@ -64,7 +61,7 @@ public class RegisterFragment  extends Fragment {
                 return;
             }
 
-            viewModel.register(username, email, password, R.drawable.pfp_red);
+            viewModel.register(username, email, password, currentProfilePicture);
             Navigation.findNavController(root).navigate(R.id.action_nav_register_to_nav_apartment);
         });
 
