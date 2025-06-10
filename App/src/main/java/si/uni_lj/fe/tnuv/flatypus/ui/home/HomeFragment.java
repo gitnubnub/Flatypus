@@ -11,11 +11,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 import si.uni_lj.fe.tnuv.flatypus.R;
 import si.uni_lj.fe.tnuv.flatypus.databinding.FragmentHomeBinding;
+import si.uni_lj.fe.tnuv.flatypus.ui.expenses.ExpensesViewModel;
 import si.uni_lj.fe.tnuv.flatypus.ui.opening.UserViewModel;
 import si.uni_lj.fe.tnuv.flatypus.ui.shoppinglist.ShoppingListViewModel;
 import si.uni_lj.fe.tnuv.flatypus.ui.to_do.ToDoViewModel;
@@ -31,6 +33,7 @@ public class HomeFragment extends Fragment {
         UserViewModel userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
         ShoppingListViewModel shoppingViewModel = new ViewModelProvider(requireActivity()).get(ShoppingListViewModel.class);
         ToDoViewModel toDoViewModel = new ViewModelProvider(this).get(ToDoViewModel.class);
+        ExpensesViewModel expensesViewModel = new ViewModelProvider(this).get(ExpensesViewModel.class);
 
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
@@ -47,7 +50,7 @@ public class HomeFragment extends Fragment {
 
 
         // Initialize heart calculation with user and shopping data
-        homeViewModel.initHeartCalculation(userViewModel, shoppingViewModel, toDoViewModel);
+        initHeartCalculation(homeViewModel, userViewModel, shoppingViewModel, toDoViewModel, expensesViewModel);
 
         // Hearts in an arc
         ConstraintLayout layout = (ConstraintLayout) root;
@@ -126,6 +129,32 @@ public class HomeFragment extends Fragment {
 
             layout.addView(heart);
         }
+    }
+
+    public void initHeartCalculation(HomeViewModel homeViewModel,UserViewModel userViewModel, ShoppingListViewModel shoppingViewModel, ToDoViewModel toDoViewModel, ExpensesViewModel expensesViewModel) {
+        userViewModel.getCurrentUser().observeForever(new Observer<UserViewModel.User>() {
+            @Override
+            public void onChanged(UserViewModel.User user) {
+                if (user != null) {
+                    String currentApartment = user.getCurrentApartment();
+                    String currentUserEmail = user.getEmail();
+                    if (currentApartment != null && !currentApartment.isEmpty()) {
+                        // Trigger task fetch to ensure data is available
+                        toDoViewModel.fetchTasks(currentApartment);
+                        // Set up observations
+                        homeViewModel.observeShoppingItems(shoppingViewModel, currentApartment);
+                        homeViewModel.observeTasks(toDoViewModel, currentUserEmail, currentApartment);
+                        homeViewModel.observeOwedExpenses(expensesViewModel, currentApartment, currentUserEmail);
+                        // Combine counts when both are available
+                        homeViewModel.combineCounts();
+                    } else {
+                        homeViewModel.calculateHeartCount(0, 0f, 0); // Default to 0 shopping items if no apartment
+                    }
+                } else {
+                    homeViewModel.calculateHeartCount(0, 0f, 0); // Default if no user
+                }
+            }
+        });
     }
 
     @Override

@@ -89,6 +89,33 @@ public class ExpensesViewModel extends ViewModel {
         return expenses;
     }
 
+    public LiveData<List<Expense>> getOwedExpenses(String apartment, String user) {
+        databaseReference.orderByChild("apartment").equalTo(apartment)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        List<Expense> filteredExpenses = new ArrayList<>();
+                        for (DataSnapshot expenseSnapshot : snapshot.getChildren()) {
+                            Expense expense = expenseSnapshot.getValue(Expense.class);
+                            if (expense != null) {
+                                if (user.equals(expense.getOwes())) {
+                                    filteredExpenses.add(expense);
+                                }
+                            }
+                        }
+                        expenses.setValue(filteredExpenses);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        expenses.setValue(Collections.emptyList());
+                        Log.e("Expenses", "Database error: " + error.getMessage());
+                    }
+                });
+
+        return expenses;
+    }
+
     public void addExpense(String apartment, float amount, String owes, String isOwed) {
         databaseReference.orderByChild("apartment").equalTo(apartment)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
