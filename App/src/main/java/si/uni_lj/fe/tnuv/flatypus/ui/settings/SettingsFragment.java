@@ -102,7 +102,7 @@ public class SettingsFragment extends Fragment {
 
         // Notifications Toggle
         Switch notificationsToggle = binding.notificationsToggle;
-        notificationsToggle.setChecked(true); // Default state (replace with dynamic source if needed)
+        notificationsToggle.setChecked(viewModel.isNotificationsEnabled()); // Default state (replace with dynamic source if needed)
         notificationsToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
             // Handle notifications toggle (implement your logic here)
             viewModel.toggleNotifications(isChecked);
@@ -128,7 +128,7 @@ public class SettingsFragment extends Fragment {
         // Leave Apartment Button
         binding.leaveApartmentButton.setOnClickListener(v -> showLeaveConfirmationDialog());
 
-        // Leave Apartment Button
+        // Log Out Button
         binding.logOutButton.setOnClickListener(v -> showLogOutConfirmationDialog());
 
         return root;
@@ -197,9 +197,10 @@ public class SettingsFragment extends Fragment {
                 .setTitle("Are you sure?")
                 .setMessage("Do you want to leave the apartment?")
                 .setPositiveButton("Yes", (dialog, which) -> {
-                    // Implement leave apartment logic here (e.g., clear currentApartment)
-                    viewModel.fetchApartment(""); // This will clear currentApartment
-                    currentApartmentCode = "";
+                    // Implement leave apartment logic here
+                    String apartmentToLeave = currentApartmentCode;
+                    viewModel.removeApartment(apartmentToLeave);
+                    currentApartmentCode = viewModel.getCurrentUser().getValue().getCurrentApartment();
                     binding.apartmentCode.setText(currentApartmentCode);
                     Toast.makeText(requireContext(), "Apartment left", Toast.LENGTH_SHORT).show();
                 })
@@ -288,18 +289,18 @@ public class SettingsFragment extends Fragment {
         EditText codeInput = view.findViewById(R.id.apartment_code_input);
 
         builder.setView(view)
-                .setPositiveButton("Join", (dialog, which) -> {
-                    String code = codeInput.getText().toString().trim().toUpperCase();
+                .setPositiveButton("Add", (dialog, which) -> {
+                    String code = codeInput.getText().toString();
                     if (code.isEmpty()) {
                         Toast.makeText(requireContext(), "Please enter a code", Toast.LENGTH_SHORT).show();
                         return;
                     }
                     viewModel.fetchApartment(code);
-                    fetchAndUpdateApartments(viewModel.getCurrentUser().getValue().getApartments());
                     adapter.notifyDataSetChanged();
                     currentApartmentCode = code; // Update current apartment code
                     binding.apartmentCode.setText(currentApartmentCode);
                     Toast.makeText(requireContext(), "Joined apartment with code " + code, Toast.LENGTH_SHORT).show();
+                    fetchAndUpdateApartments(viewModel.getCurrentUser().getValue().getApartments());
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
 
