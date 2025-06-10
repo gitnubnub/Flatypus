@@ -2,29 +2,35 @@ package si.uni_lj.fe.tnuv.flatypus.ui.home;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
+
+import java.util.List;
+
+import si.uni_lj.fe.tnuv.flatypus.ui.expenses.ExpensesViewModel;
+import si.uni_lj.fe.tnuv.flatypus.ui.opening.UserViewModel;
+import si.uni_lj.fe.tnuv.flatypus.ui.shoppinglist.ShoppingListViewModel;
+import si.uni_lj.fe.tnuv.flatypus.ui.to_do.ToDoViewModel;
 
 public class HomeViewModel extends ViewModel {
 
-    private final MutableLiveData<Integer> mHeartCount = new MutableLiveData<>(5);
-    private final MutableLiveData<Integer> mNotificationCount = new MutableLiveData<>(8);
+    private final MutableLiveData<Integer> heartCount = new MutableLiveData<>();
+    private final MutableLiveData<Integer> mNotificationCount = new MutableLiveData<>(0);
 
+    private final MutableLiveData<Integer> shoppingItemCount = new MutableLiveData<>(0); // To store shopping count
+    private final MutableLiveData<Integer> incompleteTaskCount = new MutableLiveData<>(0); // To store task count
+    private final MutableLiveData<Float> owedExpenseSum = new MutableLiveData<>(0f);
     public HomeViewModel() {
-        mHeartCount.setValue(3);
+        heartCount.setValue(5); // Default value
         mNotificationCount.setValue(0);
     }
 
     public LiveData<Integer> getHeartCount() {
-        return mHeartCount;
+        return heartCount;
     }
 
     public LiveData<Integer> getNotificationCount() {
         return mNotificationCount;
-    }
-
-    // Methods to update the state
-    public void updateHeartCount(int newCount) {
-        mHeartCount.setValue(newCount);
     }
 
     public void incrementNotificationCount() {
@@ -34,5 +40,87 @@ public class HomeViewModel extends ViewModel {
 
     public LiveData<Object> getCharacter() {
         return null;
+    }
+
+    // Methods to update the state
+    public void updateHeartCount(int newCount) {
+        heartCount.setValue(newCount);
+    }
+
+    // Initialize heart calculation with user and shopping data
+// Initialize heart calculation with user, shopping, and task data
+// Initialize heart calculation with user, shopping, and task data
+
+
+    // Function to observe and return the number of shopping items
+    void observeShoppingItems(ShoppingListViewModel shoppingViewModel, String currentApartment) {
+        shoppingViewModel.getShoppingItems(currentApartment).observeForever(new Observer<List<ShoppingListViewModel.ShoppingItem>>() {
+            @Override
+            public void onChanged(List<ShoppingListViewModel.ShoppingItem> items) {
+                int count = (items != null) ? items.size() : 0;
+                shoppingItemCount.setValue(count); // Update the shopping item count
+                combineCounts(); // Recalculate when shopping count changes
+            }
+        });
+    }
+
+    // Function to observe and return the number of incomplete user tasks
+// Function to observe and return the number of incomplete user tasks
+    void observeTasks(ToDoViewModel toDoViewModel, String currentUserEmail, String currentApartment) {
+        toDoViewModel.getTasks().observeForever(new Observer<List<ToDoViewModel.Task>>() {
+            @Override
+            public void onChanged(List<ToDoViewModel.Task> tasks) {
+                int count = toDoViewModel.getIncompleteTasksForUser(currentUserEmail, currentApartment); // Use the new method
+                incompleteTaskCount.setValue(count); // Update the incomplete task count
+                combineCounts(); // Recalculate when task count changes
+            }
+        });
+    }
+
+    // Function to observe and return the sum of owed expenses
+    void observeOwedExpenses(ExpensesViewModel expensesViewModel, String currentApartment, String currentUserEmail) {
+        expensesViewModel.getOwedExpenses(currentApartment, currentUserEmail).observeForever(new Observer<List<ExpensesViewModel.Expense>>() {
+            @Override
+            public void onChanged(List<ExpensesViewModel.Expense> expenses) {
+                float sum = 0f;
+                if (expenses != null) {
+                    for (ExpensesViewModel.Expense expense : expenses) {
+                        sum += expense.getAmount(); // Assuming Expense has getAmount()
+                    }
+                }
+                owedExpenseSum.setValue(sum); // Update the owed expense sum
+                combineCounts(); // Recalculate when expense sum changes
+            }
+        });
+    }
+
+
+
+    // Combine counts and calculate heart count
+    void combineCounts() {
+        Integer shoppingCount = shoppingItemCount.getValue() != null ? shoppingItemCount.getValue() : 0;
+        Integer taskCount = incompleteTaskCount.getValue() != null ? incompleteTaskCount.getValue() : 0;
+        Float expenseSum = owedExpenseSum.getValue() != null ? owedExpenseSum.getValue() : 0f;
+        calculateHeartCount(shoppingCount, expenseSum, taskCount); // Use stored counts
+    }
+    void calculateHeartCount(int shoppingCount, float expenseCount, int taskCount) {
+        int hearts = 5;
+
+        if (shoppingCount >= 5) {
+            hearts--;
+        }
+        if (expenseCount >= 10 && expenseCount < 50) {
+            hearts--;
+        } else if (expenseCount >= 50) {
+            hearts -= 2;
+        }
+
+        if (taskCount >= 2 && taskCount < 4) {
+            hearts--;
+        } else if (taskCount >= 4) {
+            hearts -= 2;
+        }
+
+        heartCount.setValue(Math.max(0, hearts)); // Ensure non-negative hearts
     }
 }

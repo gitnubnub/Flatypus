@@ -511,4 +511,32 @@ public class UserViewModel extends ViewModel {
         }
         return false; // Default to false if no user is logged in
     }
+
+    public void switchApartment(String apartmentCode) {
+        User current = currentUser.getValue();
+        if (current != null && current.getApartments().contains(apartmentCode)) {
+            current.currentApartment = apartmentCode;
+            currentUser.setValue(current);
+
+            databaseReference.orderByChild("email").equalTo(current.getEmail())
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            for (DataSnapshot userSnapshot : snapshot.getChildren()) {
+                                userSnapshot.getRef().child("currentApartment").setValue(apartmentCode)
+                                        .addOnSuccessListener(aVoid -> Log.d("SwitchApartment", "Switched to apartment: " + apartmentCode))
+                                        .addOnFailureListener(e -> Log.e("SwitchApartment", "Failed to switch apartment: " + e.getMessage()));
+                                break;
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            Log.e("SwitchApartment", "Database error: " + error.getMessage());
+                        }
+                    });
+        } else {
+            Log.w("SwitchApartment", "Apartment code " + apartmentCode + " not found in user's apartments or user is null");
+        }
+    }
 }

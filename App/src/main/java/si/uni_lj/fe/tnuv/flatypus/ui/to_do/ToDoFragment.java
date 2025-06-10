@@ -26,7 +26,6 @@ import si.uni_lj.fe.tnuv.flatypus.R;
 import si.uni_lj.fe.tnuv.flatypus.databinding.FragmentToDoBinding;
 import si.uni_lj.fe.tnuv.flatypus.ui.opening.UserViewModel;
 
-
 public class ToDoFragment extends Fragment {
 
     private FragmentToDoBinding binding;
@@ -35,7 +34,8 @@ public class ToDoFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        toDoViewModel = new ViewModelProvider(this).get(ToDoViewModel.class);        userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
+        toDoViewModel = new ViewModelProvider(this).get(ToDoViewModel.class);
+        userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
         binding = FragmentToDoBinding.inflate(inflater, container, false);
 
         toDoViewModel.initializeWithUserViewModel(userViewModel);
@@ -48,21 +48,28 @@ public class ToDoFragment extends Fragment {
                 ToDoViewModel.Task task = tasks.get(i);
                 View taskView = inflater.inflate(R.layout.task_layout, todoListContainer, false);
 
-                // Set up task item
                 CheckBox taskCheckbox = taskView.findViewById(R.id.task_checkbox);
                 ImageView assigneeProfilePicture = taskView.findViewById(R.id.assignee_profile_picture);
                 TextView taskName = taskView.findViewById(R.id.task_name);
 
                 taskCheckbox.setChecked(task.isCompleted());
                 taskName.setText(task.getName());
-                assigneeProfilePicture.setImageResource(task.getProfilePicture());
 
-                // Handle checkbox interaction
+                // Dynamically fetch profile picture based on assignee email
+                userViewModel.getUserByMail(task.getAssignee()).observe(getViewLifecycleOwner(), user -> {
+                    if (user != null) {
+                        assigneeProfilePicture.setImageResource(user.getProfilePicture());
+                    } else {
+                        assigneeProfilePicture.setImageResource(R.drawable.pfp_red); // Default if not found
+                    }
+                });
+
                 final int position = i;
                 taskCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
                     String currentUser = toDoViewModel.getCurrentUser();
                     if (!task.getAssignee().equals(currentUser) && !task.isCompleted()) {
                         showReassignWarningDialog(task, position, isChecked);
+                        taskCheckbox.setChecked(task.isCompleted());
                     } else {
                         toDoViewModel.updateTaskCompletion(position, isChecked);
                     }
@@ -72,7 +79,6 @@ public class ToDoFragment extends Fragment {
             }
         });
 
-        // Add Task Button
         binding.addTaskButton.setOnClickListener(v -> showAddTaskDialog());
 
         return root;
@@ -81,9 +87,9 @@ public class ToDoFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        // Fetch tasks when the fragment is resumed to get the latest data
         toDoViewModel.fetchTasks();
     }
+
     private void showReassignWarningDialog(ToDoViewModel.Task task, int position, boolean isChecked) {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Warning")
@@ -96,7 +102,6 @@ public class ToDoFragment extends Fragment {
     }
 
     private void showAddTaskDialog() {
-        // Inflate the dialog layout
         View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.add_task_layout, null);
 
         EditText taskNameInput = dialogView.findViewById(R.id.task_name_input);
@@ -104,44 +109,59 @@ public class ToDoFragment extends Fragment {
         Spinner repeatSpinner = dialogView.findViewById(R.id.repeat_spinner);
         Button addTaskButton = dialogView.findViewById(R.id.add_task_confirm_button);
 
-        // Populate assignee spinner with LiveData
-        toDoViewModel.getRoommates().observe(getViewLifecycleOwner(), roommates -> {
-            ArrayList<String> assigneeOptions = new ArrayList<>(roommates);
-            assigneeOptions.add("Random");
-            ArrayAdapter<String> assigneeAdapter = new ArrayAdapter<>(
-                    requireContext(), android.R.layout.simple_spinner_item, assigneeOptions);
-            assigneeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            assigneeSpinner.setAdapter(assigneeAdapter);
+        userViewModel.getCurrentUser().observe(getViewLifecycleOwner(), currentUser -> {
+            if (currentUser != null) {
+                String currentApartment = currentUser.getCurrentApartment();
+                if (currentApartment != null && !currentApartment.isEmpty()) {
+                    userViewModel.getRoommates(currentApartment).observe(getViewLifecycleOwner(), roommates -> {
+                        ArrayList<String> usernameOptions = new ArrayList<>();
+                        ArrayList<String> emailOptions = new ArrayList<>();
+                        usernameOptions.add("Random");
+                        emailOptions.add("random");
+
+                        if (roommates != null) {
+                            for (UserViewModel.User user : roommates) {
+                                usernameOptions.add(user.getUsername());
+                                emailOptions.add(user.getEmail());
+                            }
+                        }
+
+                        ArrayAdapter<String> assigneeAdapter = new ArrayAdapter<>(
+                                requireContext(), android.R.layout.simple_spinner_item, usernameOptions);
+                        assigneeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        assigneeSpinner.setAdapter(assigneeAdapter);
+
+                        addTaskButton.setOnClickListener(v -> {
+                            String taskName = taskNameInput.getText().toString().trim();
+                            int selectedPosition = assigneeSpinner.getSelectedItemPosition();
+                            String repeat = repeatSpinner.getSelectedItem().toString().toLowerCase();
+
+                            if (!taskName.isEmpty()) {
+                                String assigneeEmail = emailOptions.get(selectedPosition);
+                                toDoViewModel.addTask(taskName, assigneeEmail, repeat);
+                                ((AlertDialog) addTaskButton.getTag()).dismiss();
+                            } else {
+                                taskNameInput.setError("Task name cannot be empty");
+                            }
+                        });
+                    });
+                }
+            }
         });
 
-        // Populate repeat spinner
         String[] repeatOptions = {"None", "Weekly", "Monthly"};
         ArrayAdapter<String> repeatAdapter = new ArrayAdapter<>(
                 requireContext(), android.R.layout.simple_spinner_item, repeatOptions);
         repeatAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         repeatSpinner.setAdapter(repeatAdapter);
 
-        // Show dialog
         AlertDialog dialog = new AlertDialog.Builder(requireContext())
                 .setTitle("Add Task")
                 .setView(dialogView)
                 .setNegativeButton("Cancel", (d, which) -> d.dismiss())
                 .create();
         dialog.show();
-
-        // Handle add task button
-        addTaskButton.setOnClickListener(v -> {
-            String taskName = taskNameInput.getText().toString().trim();
-            String assignee = assigneeSpinner.getSelectedItem().toString();
-            String repeat = repeatSpinner.getSelectedItem().toString().toLowerCase();
-
-            if (!taskName.isEmpty()) {
-                toDoViewModel.addTask(taskName, assignee, repeat);
-                dialog.dismiss();
-            } else {
-                taskNameInput.setError("Task name cannot be empty");
-            }
-        });
+        addTaskButton.setTag(dialog);
     }
 
     @Override

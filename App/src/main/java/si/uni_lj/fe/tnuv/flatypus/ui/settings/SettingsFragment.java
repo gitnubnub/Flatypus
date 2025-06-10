@@ -271,6 +271,21 @@ public class SettingsFragment extends Fragment {
         ApartmentAdapter adapter = new ApartmentAdapter(requireContext(), userApartments);
         listView.setAdapter(adapter);
 
+        // Handle apartment item clicks
+        listView.setOnItemClickListener((parent, view1, position, id) -> {
+            Apartment selectedApartment = userApartments.get(position);
+            String apartmentCode = selectedApartment.getCode();
+            viewModel.switchApartment(apartmentCode); // Switch to the selected apartment
+
+            // Optionally observe currentUser to confirm the switch
+            viewModel.getCurrentUser().observe(getViewLifecycleOwner(), user -> {
+                if (user != null && user.getCurrentApartment().equals(apartmentCode)) {
+                    Log.d("ApartmentsDialog", "Successfully switched to apartment: " + selectedApartment.getName());
+                    ((AlertDialog) parent.getTag()).dismiss(); // Dismiss dialog on success
+                }
+            });
+        });
+
         // Handle "Add Apartment" button click
         addApartmentButton.setOnClickListener(v -> showAddApartmentDialog(adapter));
         createApartmentButton.setOnClickListener(v -> showCreateApartmentDialog(adapter));
@@ -279,8 +294,9 @@ public class SettingsFragment extends Fragment {
 
         AlertDialog dialog = builder.create();
         dialog.show();
+        // Tag the dialog for the item click listener to access it
+        listView.setTag(dialog);
     }
-
     private void showAddApartmentDialog(ApartmentAdapter adapter) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Add Apartment");
