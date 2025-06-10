@@ -106,7 +106,10 @@ public class SettingsFragment extends Fragment {
         notificationsToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
             // Handle notifications toggle (implement your logic here)
             viewModel.toggleNotifications(isChecked);
-            Toast.makeText(requireContext(), "Notifications " + (isChecked ? "on" : "off"), Toast.LENGTH_SHORT).show();
+            new AlertDialog.Builder(requireContext())
+                    .setMessage("Notifications " + (isChecked ? "on" : "off"))
+                    .setPositiveButton("OK", (d2, which) -> d2.dismiss())
+                    .show();
         });
 
         // Apartments Button
@@ -122,7 +125,10 @@ public class SettingsFragment extends Fragment {
             ClipboardManager clipboard = (ClipboardManager) requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText("Apartment Code", currentApartmentCode);
             clipboard.setPrimaryClip(clip);
-            Toast.makeText(requireContext(), "Copied to clipboard", Toast.LENGTH_SHORT).show();
+            new AlertDialog.Builder(requireContext())
+                    .setMessage("Copied to clipboard")
+                    .setPositiveButton("OK", (d2, which) -> d2.dismiss())
+                    .show();
         });
 
         // Leave Apartment Button
@@ -181,9 +187,15 @@ public class SettingsFragment extends Fragment {
                         viewModel.changeUsername(newUsername);
                         currentUsername = newUsername;
                         binding.usernameInput.setText(currentUsername);
-                        Toast.makeText(requireContext(), "Username saved", Toast.LENGTH_SHORT).show();
+                        new AlertDialog.Builder(requireContext())
+                                .setMessage("Username saved")
+                                .setPositiveButton("OK", (d2, w) -> d2.dismiss())
+                                .show();
                     } else {
-                        Toast.makeText(requireContext(), "Username cannot be empty", Toast.LENGTH_SHORT).show();
+                        new AlertDialog.Builder(requireContext())
+                                .setMessage("Username cannot be empty")
+                                .setPositiveButton("OK", (d2, w) -> d2.dismiss())
+                                .show();
                     }
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
@@ -202,7 +214,10 @@ public class SettingsFragment extends Fragment {
                     viewModel.removeApartment(apartmentToLeave);
                     currentApartmentCode = viewModel.getCurrentUser().getValue().getCurrentApartment();
                     binding.apartmentCode.setText(currentApartmentCode);
-                    Toast.makeText(requireContext(), "Apartment left", Toast.LENGTH_SHORT).show();
+                    new AlertDialog.Builder(requireContext())
+                            .setMessage("Apartment left")
+                            .setPositiveButton("OK", (d2, w) -> d2.dismiss())
+                            .show();
                 })
                 .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
                 .show();
@@ -214,7 +229,10 @@ public class SettingsFragment extends Fragment {
                 .setMessage("Do you want to log out?")
                 .setPositiveButton("Yes", (dialog, which) -> {
                     viewModel.logout();
-                    Toast.makeText(requireContext(), "Logged out", Toast.LENGTH_SHORT).show();
+                    new AlertDialog.Builder(requireContext())
+                            .setMessage("Logged out")
+                            .setPositiveButton("OK", (d2, w) -> d2.dismiss())
+                            .show();
                 })
                 .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
                 .show();
@@ -248,7 +266,10 @@ public class SettingsFragment extends Fragment {
                         currentProfilePicture = profilePictures[selectedPosition];
                         binding.profilePicture.setImageResource(currentProfilePicture);
                         viewModel.changeProfilePicture(currentProfilePicture);
-                        Toast.makeText(requireContext(), "Profile picture updated", Toast.LENGTH_SHORT).show();
+                        new AlertDialog.Builder(requireContext())
+                                .setMessage("Profile picture updated")
+                                .setPositiveButton("OK", (d2, w) -> d2.dismiss())
+                                .show();
                     }
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
@@ -308,14 +329,20 @@ public class SettingsFragment extends Fragment {
                 .setPositiveButton("Add", (dialog, which) -> {
                     String code = codeInput.getText().toString();
                     if (code.isEmpty()) {
-                        Toast.makeText(requireContext(), "Please enter a code", Toast.LENGTH_SHORT).show();
+                        new AlertDialog.Builder(requireContext())
+                                .setMessage("Please enter a code")
+                                .setPositiveButton("OK", (d2, w) -> d2.dismiss())
+                                .show();
                         return;
                     }
                     viewModel.fetchApartment(code);
                     adapter.notifyDataSetChanged();
                     currentApartmentCode = code; // Update current apartment code
                     binding.apartmentCode.setText(currentApartmentCode);
-                    Toast.makeText(requireContext(), "Joined apartment with code " + code, Toast.LENGTH_SHORT).show();
+                    new AlertDialog.Builder(requireContext())
+                            .setMessage("Joined apartment with code " + code)
+                            .setPositiveButton("OK", (d2, w) -> d2.dismiss())
+                            .show();
                     fetchAndUpdateApartments(viewModel.getCurrentUser().getValue().getApartments());
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
@@ -335,7 +362,10 @@ public class SettingsFragment extends Fragment {
                 .setPositiveButton("Create", (dialog, which) -> {
                     String name = nameInput.getText().toString();
                     if (name.isEmpty()) {
-                        Toast.makeText(requireContext(), "Please enter a name", Toast.LENGTH_SHORT).show();
+                        new AlertDialog.Builder(requireContext())
+                                .setMessage("Please enter a name")
+                                .setPositiveButton("OK", (d2, w) -> d2.dismiss())
+                                .show();
                         return;
                     }
                     String code = generateRandomString();
@@ -344,7 +374,10 @@ public class SettingsFragment extends Fragment {
                     adapter.notifyDataSetChanged();
                     currentApartmentCode = code; // Update current apartment code
                     binding.apartmentCode.setText(currentApartmentCode);
-                    Toast.makeText(requireContext(), "Joined apartment with code " + code, Toast.LENGTH_SHORT).show();
+                    new AlertDialog.Builder(requireContext())
+                            .setMessage("Joined apartment with code " + code)
+                            .setPositiveButton("OK", (d2, w) -> d2.dismiss())
+                            .show();
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
 
