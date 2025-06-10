@@ -25,19 +25,17 @@ public class ToDoViewModel extends ViewModel {
     // Task data class
     public static class Task {
         private String name;
-        private String assignee;
-        private int profilePicture; // Resource name or URL (e.g., "platypus")
+        private String assignee; // Now stores email
         private boolean isCompleted;
-        private String repeat; // "none", "weekly", "monthly"
+        private String repeat;
         public String apartmentCode;
         private String taskId;
 
-        public Task(){}
+        public Task() {}
 
-        public Task(String name, String assignee, int profilePicture, boolean isCompleted, String repeat, String apartmentCode, String taskId) {
+        public Task(String name, String assignee, boolean isCompleted, String repeat, String apartmentCode, String taskId) {
             this.name = name;
-            this.assignee = assignee;
-            this.profilePicture = profilePicture;
+            this.assignee = assignee; // Email
             this.isCompleted = isCompleted;
             this.repeat = repeat;
             this.apartmentCode = apartmentCode;
@@ -46,7 +44,6 @@ public class ToDoViewModel extends ViewModel {
 
         public String getName() { return name; }
         public String getAssignee() { return assignee; }
-        public int getProfilePicture() { return profilePicture; }
         public boolean isCompleted() { return isCompleted; }
         public void setCompleted(boolean completed) { this.isCompleted = completed; }
         public String getRepeat() { return repeat; }
@@ -57,25 +54,23 @@ public class ToDoViewModel extends ViewModel {
     private final MutableLiveData<List<Task>> tasks = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<Integer> notificationCount = new MutableLiveData<>(0);
     private final MutableLiveData<List<String>> roommates = new MutableLiveData<>(new ArrayList<>());
-    private String currentUser = "Eva"; // Replace with dynamic source if needed
+    private String currentUserEmail; // Changed to email
     private DatabaseReference databaseReference;
     private String currentApartmentCode = ""; // Will be set from UserViewModel
     private UserViewModel userViewModel;
-
 
     public ToDoViewModel() {
         FirebaseDatabase database = FirebaseDatabase.getInstance("https://flatypus-fde01-default-rtdb.europe-west1.firebasedatabase.app");
         databaseReference = database.getReference();
     }
 
-    // Setter to initialize with shared UserViewModel
     public void initializeWithUserViewModel(UserViewModel userViewModel) {
         this.userViewModel = userViewModel;
         userViewModel.getCurrentUser().observeForever(user -> {
             if (user != null) {
-                currentUser = user.getUsername(); // Update current user
+                currentUserEmail = user.getEmail(); // Use email
                 currentApartmentCode = user.getCurrentApartment(); // Update apartment code
-                Log.d("ToDoViewModel", "Current user: " + currentUser + ", apartment: " + currentApartmentCode);
+                Log.d("ToDoViewModel", "Current user email: " + currentUserEmail + ", apartment: " + currentApartmentCode);
                 if (!currentApartmentCode.isEmpty()) {
                     fetchRoommates();
                     fetchTasks();
@@ -87,18 +82,18 @@ public class ToDoViewModel extends ViewModel {
             }
         });
 
-        // Initial check
         UserViewModel.User initialUser = userViewModel.getCurrentUser().getValue();
         if (initialUser != null) {
-            currentUser = initialUser.getUsername();
+            currentUserEmail = initialUser.getEmail();
             currentApartmentCode = initialUser.getCurrentApartment();
-            Log.d("ToDoViewModel", "Initial user: " + currentUser + ", apartment: " + currentApartmentCode);
+            Log.d("ToDoViewModel", "Initial user email: " + currentUserEmail + ", apartment: " + currentApartmentCode);
             if (!currentApartmentCode.isEmpty()) {
                 fetchRoommates();
                 fetchTasks();
             }
         }
     }
+
     public LiveData<List<Task>> getTasks() {
         return tasks;
     }
@@ -112,68 +107,64 @@ public class ToDoViewModel extends ViewModel {
     }
 
     public String getCurrentUser() {
-        return currentUser;
+        return currentUserEmail; // Return email
     }
 
-    public void addTask(String name, String assignee, String repeat) {
+    public void addTask(String name, String assigneeEmail, String repeat) {
         List<Task> currentTasks = tasks.getValue();
         if (currentTasks == null) {
             currentTasks = new ArrayList<>();
         }
-        if ("random".equalsIgnoreCase(assignee)) {
+        if ("random".equalsIgnoreCase(assigneeEmail)) {
             List<String> currentRoommates = roommates.getValue();
             if (currentRoommates != null && !currentRoommates.isEmpty()) {
                 Random random = new Random();
-                assignee = currentRoommates.get(random.nextInt(currentRoommates.size()));
-            } else {
-                assignee = currentUser; // Fallback if no roommates
-            }
-        }
-        final int[] profilePicture = {R.drawable.pfp_red};
-        String finalAssignee = assignee;
-        List<Task> finalCurrentTasks = currentTasks;
-        databaseReference.child("users").orderByChild("username").equalTo(assignee)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        for (DataSnapshot userSnapshot : snapshot.getChildren()) {
-                            UserViewModel.User user = userSnapshot.getValue(UserViewModel.User.class);
-                            if (user != null) {
-                                profilePicture[0] = user.getProfilePicture();
-                                String taskId = databaseReference.child("tasks").push().getKey();
-                                Task newTask = new Task(name, finalAssignee, profilePicture[0], false, repeat, currentApartmentCode, taskId);
-                                finalCurrentTasks.add(newTask);
-                                tasks.setValue(finalCurrentTasks);
-
-                                // Save to database
-                                if (taskId != null) {
-                                    databaseReference.child("tasks").child(taskId).setValue(newTask)
-                                            .addOnSuccessListener(aVoid -> Log.d("AddTask", "Task added to database with ID: " + taskId))
-                                            .addOnFailureListener(e -> Log.e("AddTask", "Failed to add task: " + e.getMessage()));
-                                }
-                                break;
-                            }
+                String randomUsername = currentRoommates.get(random.nextInt(currentRoommates.size()));
+                // Use a final local variable to store the updated email
+                final String[] updatedAssigneeEmail = new String[1]; // Array to allow modification in lambda
+                userViewModel.getRoommates(currentApartmentCode).observeForever(users -> {
+                    for (UserViewModel.User user : users) {
+                        if (user.getUsername().equals(randomUsername)) {
+                            updatedAssigneeEmail[0] = user.getEmail();
+                            addTaskToListAndDatabase(name, updatedAssigneeEmail[0], repeat);
+                            break;
                         }
                     }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Log.e("AddTask", "Database error: " + error.getMessage());
-                    }
                 });
+            } else {
+                assigneeEmail = currentUserEmail; // Fallback
+                addTaskToListAndDatabase(name, assigneeEmail, repeat);
+            }
+        } else {
+            addTaskToListAndDatabase(name, assigneeEmail, repeat);
+        }
+    }
+
+    private void addTaskToListAndDatabase(String name, String assigneeEmail, String repeat) {
+        List<Task> currentTasks = tasks.getValue();
+        if (currentTasks == null) currentTasks = new ArrayList<>();
+
+        String taskId = databaseReference.child("tasks").push().getKey();
+        Task newTask = new Task(name, assigneeEmail, false, repeat, currentApartmentCode, taskId);
+        currentTasks.add(newTask);
+        tasks.setValue(currentTasks);
+
+        if (taskId != null) {
+            databaseReference.child("tasks").child(taskId).setValue(newTask)
+                    .addOnSuccessListener(aVoid -> Log.d("AddTask", "Task added to database with ID: " + taskId))
+                    .addOnFailureListener(e -> Log.e("AddTask", "Failed to add task: " + e.getMessage()));
+        }
     }
 
     public void updateTaskCompletion(int position, boolean isChecked) {
         List<Task> currentTasks = tasks.getValue();
         if (currentTasks != null && position >= 0 && position < currentTasks.size()) {
             Task task = currentTasks.get(position);
-            // Invert the current completion status
             boolean newCompletedStatus = !task.isCompleted();
             task.setCompleted(newCompletedStatus);
-            currentTasks.set(position, task); // Update the task in the list
-            tasks.setValue(currentTasks); // Notify observers of the change
+            currentTasks.set(position, task);
+            tasks.setValue(currentTasks);
 
-            // Update in database using the taskId with the inverted value
             String taskId = task.getTaskId();
             if (taskId != null) {
                 databaseReference.child("tasks").child(taskId).child("isCompleted").setValue(newCompletedStatus)
@@ -210,7 +201,8 @@ public class ToDoViewModel extends ViewModel {
             }
         });
     }
-    void fetchTasks() {
+
+    public void fetchTasks() {
         if (currentApartmentCode.isEmpty()) {
             Log.w("FetchTasks", "currentApartmentCode is empty, skipping fetch");
             return;
@@ -224,24 +216,21 @@ public class ToDoViewModel extends ViewModel {
                         for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                             Task task = dataSnapshot.getValue(Task.class);
                             if (task != null) {
-                                task.taskId = dataSnapshot.getKey(); // Ensure taskId is set
-                                // Explicitly check the isCompleted value from the snapshot
+                                task.taskId = dataSnapshot.getKey();
                                 Boolean isCompletedFromDb = dataSnapshot.child("isCompleted").getValue(Boolean.class);
                                 if (isCompletedFromDb != null && isCompletedFromDb) {
-                                    // Delete completed tasks from the database
                                     dataSnapshot.getRef().removeValue()
                                             .addOnSuccessListener(aVoid -> {
                                                 Log.d("FetchTasks", "Deleted completed task with ID: " + task.getTaskId());
-                                                // Re-fetch tasks after deletion
                                                 fetchTasks();
                                             })
                                             .addOnFailureListener(e -> Log.e("FetchTasks", "Failed to delete task: " + e.getMessage()));
                                 } else {
-                                    taskList.add(task); // Only add incomplete tasks to the list
+                                    taskList.add(task);
                                 }
                             }
                         }
-                        tasks.setValue(taskList); // Update with only incomplete tasks
+                        tasks.setValue(taskList);
                     }
 
                     @Override
@@ -249,5 +238,68 @@ public class ToDoViewModel extends ViewModel {
                         Log.e("FetchTasks", "Database error: " + error.getMessage());
                     }
                 });
+    }
+    public void fetchTasks(String currentApartmentCode) {
+        if (currentApartmentCode.isEmpty()) {
+            Log.w("FetchTasks", "currentApartmentCode is empty, skipping fetch");
+            return;
+        }
+
+        databaseReference.child("tasks").orderByChild("apartmentCode").equalTo(currentApartmentCode)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        List<Task> taskList = new ArrayList<>();
+                        for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                            Task task = dataSnapshot.getValue(Task.class);
+                            if (task != null) {
+                                task.taskId = dataSnapshot.getKey();
+                                Boolean isCompletedFromDb = dataSnapshot.child("isCompleted").getValue(Boolean.class);
+                                if (isCompletedFromDb != null && isCompletedFromDb) {
+                                    dataSnapshot.getRef().removeValue()
+                                            .addOnSuccessListener(aVoid -> {
+                                                Log.d("FetchTasks", "Deleted completed task with ID: " + task.getTaskId());
+                                                fetchTasks();
+                                            })
+                                            .addOnFailureListener(e -> Log.e("FetchTasks", "Failed to delete task: " + e.getMessage()));
+                                } else {
+                                    taskList.add(task);
+                                }
+                            }
+                        }
+                        tasks.setValue(taskList);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.e("FetchTasks", "Database error: " + error.getMessage());
+                    }
+                });
+    }
+
+    // New method to count incomplete tasks for a specific user email
+    public int getIncompleteTasksForUser(String userEmail, String currentApartmentCode) {
+        List<Task> currentTasks = tasks.getValue();
+        int incompleteCount = 0;
+
+        if (currentTasks != null) {
+            for (Task task : currentTasks) {
+                Log.d("GetIncompleteTasks", "Evaluating task: Assignee=" + task.getAssignee() +
+                        ", UserEmail=" + userEmail + ", isCompleted=" + task.isCompleted() +
+                        ", Apartment=" + task.getApartmentCode() + ", CurrentApartment=" + currentApartmentCode);
+                if (task.getAssignee() != null && userEmail != null &&
+                        task.getAssignee().equalsIgnoreCase(userEmail) &&
+                        !task.isCompleted() &&
+                        task.getApartmentCode().equals(currentApartmentCode)) {
+                    incompleteCount++;
+                    Log.d("GetIncompleteTasks", "Match found for task: " + task.getName());
+                }
+            }
+        } else {
+            Log.w("GetIncompleteTasks", "Current tasks list is null");
+        }
+
+        Log.d("GetIncompleteTasks", "User: " + userEmail + ", Incomplete Count: " + incompleteCount + ", Apartment: " + currentApartmentCode);
+        return incompleteCount;
     }
 }
