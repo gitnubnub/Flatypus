@@ -1,6 +1,5 @@
 package si.uni_lj.fe.tnuv.flatypus.ui.chat;
 
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -14,9 +13,18 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import java.time.Instant;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 import si.uni_lj.fe.tnuv.flatypus.R;
 import si.uni_lj.fe.tnuv.flatypus.databinding.FragmentChatBinding;
@@ -37,47 +45,76 @@ public class ChatFragment extends Fragment {
         binding = FragmentChatBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        binding.backButton.setOnClickListener(v -> requireActivity().onBackPressed());
+        binding.backButton.setOnClickListener(v -> {
+            Navigation.findNavController(root).navigate(R.id.action_nav_chat_to_nav_home);
+            AppCompatActivity activity = (AppCompatActivity) requireActivity();
+            BottomNavigationView navView = activity.findViewById(R.id.nav_view);
+            if (navView != null) {
+                navView.setSelectedItemId(R.id.navigation_home);
+            }
+        });
 
         userViewModel.getCurrentUser().observe(getViewLifecycleOwner(), user -> {
             if (user != null) {
                 currentUser = user.getEmail();
                 currentApartmentCode = user.getCurrentApartment();
 
-                ScrollView messagesContainer = binding.messagesContainer;
+                LinearLayout messagesLayout = binding.messagesLayout;
                 viewModel.getChats(currentApartmentCode).observe(getViewLifecycleOwner(), chats -> {
-                    messagesContainer.removeAllViews();
+                    messagesLayout.removeAllViews();
+                    Collections.sort(chats, Comparator.comparing(c -> Instant.parse(c.getTimestamp())));
 
-                    for (int i = 0; i < chats.size(); i++) {
-                        ChatViewModel.Chat chat = chats.get(i);
-                        View chatView = inflater.inflate(R.layout.message_layout, messagesContainer, false);
+                    // Map to cache user data
+                    Map<String, UserViewModel.User> userCache = new HashMap<>();
 
-                        if (!chat.getSender().equals(currentUser)) {
-                            userViewModel.getUserByMail(chat.getSender()).observe(getViewLifecycleOwner(), otherUser -> {
-                                TextView message = chatView.findViewById(R.id.message_text);
-                                ImageView senderProfilePicture = chatView.findViewById(R.id.sender_picture);
-                                TextView senderName = chatView.findViewById(R.id.sender_name);
+                    for (ChatViewModel.Chat chat : chats) {
+                        View chatView = inflater.inflate(R.layout.message_layout, messagesLayout, false);
+                        TextView message = chatView.findViewById(R.id.message_text);
+                        LinearLayout senderInfo = chatView.findViewById(R.id.sender_info);
+                        ImageView senderProfilePicture = chatView.findViewById(R.id.sender_picture);
+                        TextView senderName = chatView.findViewById(R.id.sender_name);
 
-                                message.setText(chat.getMessage());
-                                message.setBackgroundResource(R.drawable.received_message_bckg);
-                                message.setTextColor(getResources().getColor(R.color.dark_red));
-                                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) message.getLayoutParams();
-                                params.gravity = Gravity.START;
-                                message.setLayoutParams(params);
+                        message.setText(chat.getMessage());
 
-                                senderProfilePicture.setImageResource(otherUser.getProfilePicture());
-                                senderName.setText(otherUser.getUsername());
-                            });
-                        } else {
-                            TextView message = chatView.findViewById(R.id.message_text);
-                            message.setText(chat.getMessage());
+                        if (chat.getSender().equals(currentUser)) {
+                            // Sent message
                             message.setBackgroundResource(R.drawable.sent_message_bckg);
                             message.setTextColor(getResources().getColor(R.color.wheat));
                             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) message.getLayoutParams();
                             params.gravity = Gravity.END;
                             message.setLayoutParams(params);
+                            senderInfo.setVisibility(View.GONE);
+                        } else {
+                            // Received message
+                            message.setBackgroundResource(R.drawable.received_message_bckg);
+                            message.setTextColor(getResources().getColor(R.color.dark_red));
+                            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) message.getLayoutParams();
+                            params.gravity = Gravity.START;
+                            message.setLayoutParams(params);
+                            senderInfo.setVisibility(View.VISIBLE);
+
+                            // Fetch user data if not cached
+                            if (!userCache.containsKey(chat.getSender())) {
+                                userViewModel.getUserByMail(chat.getSender()).observe(getViewLifecycleOwner(), otherUser -> {
+                                    userCache.put(chat.getSender(), otherUser);
+                                    senderProfilePicture.setImageResource(otherUser.getProfilePicture());
+                                    senderName.setText(otherUser.getUsername());
+                                });
+                            } else {
+                                UserViewModel.User cachedUser = userCache.get(chat.getSender());
+                                senderProfilePicture.setImageResource(cachedUser.getProfilePicture());
+                                senderName.setText(cachedUser.getUsername());
+                            }
                         }
+
+                        messagesLayout.addView(chatView);
                     }
+
+                    // Scroll to the bottom after rendering
+                    messagesLayout.post(() -> {
+                        ScrollView scrollView = binding.messagesContainer;
+                        scrollView.fullScroll(View.FOCUS_DOWN);
+                    });
                 });
 
                 EditText messageInput = binding.messageInput;
@@ -91,6 +128,7 @@ public class ChatFragment extends Fragment {
                     }
 
                     viewModel.addChat(currentApartmentCode, messageText, currentUser);
+                    messageInput.setText(""); // Clear input after sending
                 });
             }
         });
