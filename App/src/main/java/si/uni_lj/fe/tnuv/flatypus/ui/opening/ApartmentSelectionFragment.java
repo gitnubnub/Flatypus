@@ -42,7 +42,7 @@ public class ApartmentSelectionFragment extends Fragment {
                 return;
             }
 
-            viewModel.addApartment(apartmentCode);
+            viewModel.fetchApartment(apartmentCode);
         });
 
         binding.createApartmentButton.setOnClickListener(v -> showCreateApartmentDialog());
@@ -68,7 +68,7 @@ public class ApartmentSelectionFragment extends Fragment {
             String apartmentCode = generateRandomString();
 
             if (!apartmentName.isEmpty()) {
-                viewModel.addApartment(apartmentCode);
+                viewModel.addApartment(apartmentCode, apartmentName);
                 dialog.dismiss();
             } else {
                 apartmentNameInput.setError("Item name cannot be empty");
