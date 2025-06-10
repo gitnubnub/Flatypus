@@ -55,7 +55,6 @@ public class ToDoFragment extends Fragment {
 
                 taskCheckbox.setChecked(task.isCompleted());
                 taskName.setText(task.getName());
-
                 assigneeProfilePicture.setImageResource(task.getProfilePicture());
 
                 // Handle checkbox interaction
@@ -64,7 +63,6 @@ public class ToDoFragment extends Fragment {
                     String currentUser = toDoViewModel.getCurrentUser();
                     if (!task.getAssignee().equals(currentUser) && !task.isCompleted()) {
                         showReassignWarningDialog(task, position, isChecked);
-                        taskCheckbox.setChecked(false); // Reset checkbox until confirmed
                     } else {
                         toDoViewModel.updateTaskCompletion(position, isChecked);
                     }
@@ -80,6 +78,12 @@ public class ToDoFragment extends Fragment {
         return root;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Fetch tasks when the fragment is resumed to get the latest data
+        toDoViewModel.fetchTasks();
+    }
     private void showReassignWarningDialog(ToDoViewModel.Task task, int position, boolean isChecked) {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Warning")
