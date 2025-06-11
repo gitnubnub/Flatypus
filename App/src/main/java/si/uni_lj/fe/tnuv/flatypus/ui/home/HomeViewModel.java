@@ -4,13 +4,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
 
 import java.util.List;
 
+import si.uni_lj.fe.tnuv.flatypus.R;
 import si.uni_lj.fe.tnuv.flatypus.ui.expenses.ExpensesViewModel;
 import si.uni_lj.fe.tnuv.flatypus.ui.opening.UserViewModel;
 import si.uni_lj.fe.tnuv.flatypus.ui.shoppinglist.ShoppingListViewModel;
@@ -26,6 +29,7 @@ public class HomeViewModel extends ViewModel {
     private final MutableLiveData<Integer> incompleteTaskCount = new MutableLiveData<>(0); // To store task count
     private final MutableLiveData<Float> owedExpenseSum = new MutableLiveData<>(0f);
     private Context context;
+    private UserViewModel userViewModel;
 
     public HomeViewModel() {
         heartCount.setValue(5); // Default value
@@ -55,13 +59,14 @@ public class HomeViewModel extends ViewModel {
         return value != null ? value : 0;
     }
 
-    public void updateHeartCount(int newCount) {
+    public void updateHeartCount(int newCount, int platypusResourceId) {
         heartCount.setValue(newCount);
         if (context != null) {
-            Log.d("HomeViewModel", "Broadcasting heartCount: " + newCount + ", Context: " + context);
+            Log.d("HomeViewModel", "Broadcasting heartCount: " + newCount + ", platypusResourceId: " + platypusResourceId + ", Context: " + context);
             Intent intent = new Intent(ACTION_HEART_COUNT_UPDATED);
             intent.putExtra("heartCount", newCount);
-            context.getApplicationContext().sendBroadcast(intent); // Use application context
+            intent.putExtra("platypusResourceId", platypusResourceId);
+            context.getApplicationContext().sendBroadcast(intent);
             // Fallback: Force widget update
             WidgetProvider.updateWidgets(context.getApplicationContext());
         } else {
@@ -75,7 +80,8 @@ public class HomeViewModel extends ViewModel {
 
     public void initHeartCalculation(Context context, UserViewModel userViewModel, ShoppingListViewModel shoppingViewModel,
                                      ToDoViewModel toDoViewModel, ExpensesViewModel expensesViewModel) {
-        this.context = context; // Store the context
+        this.context = context;
+        this.userViewModel = userViewModel; // Store the passed UserViewModel
         userViewModel.getCurrentUser().observeForever(new Observer<UserViewModel.User>() {
             @Override
             public void onChanged(UserViewModel.User user) {
@@ -88,10 +94,10 @@ public class HomeViewModel extends ViewModel {
                         observeTasks(toDoViewModel, currentUserEmail, currentApartment);
                         observeOwedExpenses(expensesViewModel, currentApartment, currentUserEmail);
                     } else {
-                        calculateHeartCount(0, 0f, 0);
+                        calculateHeartCount(0, 0f, 0, user.getProfilePicture());
                     }
                 } else {
-                    calculateHeartCount(0, 0f, 0);
+                    calculateHeartCount(0, 0f, 0, R.drawable.platypus_red); // Default platypus
                 }
             }
         });
@@ -145,9 +151,26 @@ public class HomeViewModel extends ViewModel {
         Integer shoppingCount = shoppingItemCount.getValue() != null ? shoppingItemCount.getValue() : 0;
         Integer taskCount = incompleteTaskCount.getValue() != null ? incompleteTaskCount.getValue() : 0;
         Float expenseSum = owedExpenseSum.getValue() != null ? owedExpenseSum.getValue() : 0f;
-        calculateHeartCount(shoppingCount, expenseSum, taskCount); // Use stored counts
+        int platypusResource = userViewModel.getCurrentUser().getValue() != null ? userViewModel.getCurrentUser().getValue().getProfilePicture() : R.drawable.platypus_red;
+        // Map profile picture to platypus resource
+        int platypusResourceId = mapToPlatypusResource(platypusResource);
+        calculateHeartCount(shoppingCount, expenseSum, taskCount, platypusResourceId);
     }
-    void calculateHeartCount(int shoppingCount, float expenseCount, int taskCount) {
+
+    private int mapToPlatypusResource(int profilePictureId) {
+        if (profilePictureId == R.drawable.pfp_red) {
+            return R.drawable.platypus_red;
+        } else if (profilePictureId == R.drawable.pfp_green) {
+            return R.drawable.platypus_green;
+        } else if (profilePictureId == R.drawable.pfp_purple) {
+            return R.drawable.platypus_purple;
+        } else {
+            Log.w("HomeViewModel", "Unknown profile picture value: " + profilePictureId + ", defaulting to platypus_red");
+            return R.drawable.platypus_red;
+        }
+    }
+
+    void calculateHeartCount(int shoppingCount, float expenseCount, int taskCount, int platypusResource) {
         int hearts = 5;
 
         if (shoppingCount >= 5) {
@@ -167,6 +190,6 @@ public class HomeViewModel extends ViewModel {
 
         int finalHearts = Math.max(0, hearts);
         //heartCount.setValue(finalHearts);
-        updateHeartCount(finalHearts); // Use stored context
+        updateHeartCount(finalHearts, platypusResource); // Use stored context
     }
 }

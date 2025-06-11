@@ -75,25 +75,33 @@ public class HomeFragment extends Fragment {
             notificationCount.setText(count > 99 ? "99+" : String.valueOf(count));
         });
 
-        // Platypus (Observe LiveData to handle null safely)
+// Platypus (Observe LiveData to handle null safely)
         ImageView platypus = binding.characterImage;
         userViewModel.getCurrentUser().observe(getViewLifecycleOwner(), user -> {
             if (user != null) {
                 int currentPfp = user.getProfilePicture();
                 Log.d("Home Fragment: ", "Profile picture value: " + currentPfp);
+                int platypusResource = R.drawable.platypus_red; // Default
                 if (currentPfp == R.drawable.pfp_red) {
                     platypus.setImageResource(R.drawable.platypus_red);
+                    platypusResource = R.drawable.platypus_red;
                 } else if (currentPfp == R.drawable.pfp_green) {
                     platypus.setImageResource(R.drawable.platypus_green);
+                    platypusResource = R.drawable.platypus_green;
                 } else if (currentPfp == R.drawable.pfp_purple) {
                     platypus.setImageResource(R.drawable.platypus_purple);
+                    platypusResource = R.drawable.platypus_purple;
                 } else {
                     Log.w("Home Fragment: ", "Unknown profile picture value: " + currentPfp + ", defaulting to platypus_red");
                     platypus.setImageResource(R.drawable.platypus_red);
+                    platypusResource = R.drawable.platypus_red;
                 }
+                // Update widget with platypus resource ID
+                homeViewModel.updateHeartCount(homeViewModel.getCurrentHeartCount(), platypusResource);
             } else {
                 Log.w("Home Fragment: ", "User is null, defaulting to platypus_red");
                 platypus.setImageResource(R.drawable.platypus_red);
+                homeViewModel.updateHeartCount(homeViewModel.getCurrentHeartCount(), R.drawable.platypus_red);
             }
         });
 
