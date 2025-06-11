@@ -24,7 +24,6 @@ public class WidgetProvider extends AppWidgetProvider {
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
-        // Use application context for persistent registration
         Context appContext = context.getApplicationContext();
         IntentFilter filter = new IntentFilter(ACTION_HEART_COUNT_UPDATED);
         ContextCompat.registerReceiver(appContext, this, filter, ContextCompat.RECEIVER_NOT_EXPORTED);
@@ -40,11 +39,12 @@ public class WidgetProvider extends AppWidgetProvider {
         super.onReceive(context, intent);
         if (ACTION_HEART_COUNT_UPDATED.equals(intent.getAction())) {
             int heartCount = intent.getIntExtra("heartCount", HomeViewModel.getCurrentHeartCount());
-            Log.d(TAG, "Received heartCount: " + heartCount + ", Intent extra: " + intent.getIntExtra("heartCount", -1) + ", Static value: " + HomeViewModel.getCurrentHeartCount());
+            int platypusResourceId = intent.getIntExtra("platypusResourceId", R.drawable.platypus_red); // Default to platypus_red
+            Log.d(TAG, "Received heartCount: " + heartCount + ", platypusResourceId: " + platypusResourceId + ", Intent Extras: " + intent.getExtras());
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
             int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(context, WidgetProvider.class));
             for (int appWidgetId : appWidgetIds) {
-                updateAppWidget(context.getApplicationContext(), appWidgetManager, appWidgetId, heartCount);
+                updateAppWidget(context.getApplicationContext(), appWidgetManager, appWidgetId, heartCount, platypusResourceId);
             }
         }
     }
@@ -55,10 +55,10 @@ public class WidgetProvider extends AppWidgetProvider {
     }
 
     public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
-        updateAppWidget(context, appWidgetManager, appWidgetId, HomeViewModel.getCurrentHeartCount());
+        updateAppWidget(context, appWidgetManager, appWidgetId, HomeViewModel.getCurrentHeartCount(), R.drawable.platypus_red);
     }
 
-    public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId, int heartCount) {
+    public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId, int heartCount, int platypusResourceId) {
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
 
         Intent intent = new Intent(context, MainActivity.class);
@@ -66,11 +66,14 @@ public class WidgetProvider extends AppWidgetProvider {
         views.setOnClickPendingIntent(R.id.openApplication, pendingIntent);
 
         views.setTextViewText(R.id.heart_count, String.valueOf(heartCount > 0 ? heartCount : "0"));
-        Log.d(TAG, "Updating widget with heartCount: " + heartCount);
+        Log.d(TAG, "Updating widget with heartCount: " + heartCount + ", platypusResourceId: " + platypusResourceId + ", Resource Name: " + context.getResources().getResourceName(platypusResourceId));
+
+        // Use the received platypus resource ID directly
+        views.setImageViewResource(R.id.openApplication, platypusResourceId);
 
         appWidgetManager.updateAppWidget(appWidgetId, views);
-        // Ensure UI refresh
-        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.heart_count);
+        // Force refresh to ensure the update is applied
+        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.openApplication);
     }
 
     public static void updateWidgets(Context context) {
