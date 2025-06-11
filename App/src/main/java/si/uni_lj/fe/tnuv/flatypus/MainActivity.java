@@ -17,6 +17,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import si.uni_lj.fe.tnuv.flatypus.databinding.ActivityMainBinding;
 import si.uni_lj.fe.tnuv.flatypus.ui.opening.UserViewModel;
+import si.uni_lj.fe.tnuv.flatypus.widget.WidgetProvider;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -66,6 +67,8 @@ public class MainActivity extends AppCompatActivity {
                 navView.setVisibility(View.GONE);
             }
         });
+
+        WidgetProvider.updateWidgets(getApplicationContext());
     }
 
 }

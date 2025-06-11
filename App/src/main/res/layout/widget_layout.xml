@@ -29,7 +29,7 @@
             android:id="@+id/heart_count"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="0"
+            android:text=""
             android:textColor="#4A2C2A"
             android:textSize="30sp" />
     </LinearLayout>
@@ -40,7 +40,7 @@
         android:layout_width="281dp"
         android:layout_height="453dp"
         android:layout_centerInParent="true"
-        android:src="@drawable/platypus" />
+        android:src="@drawable/platypus_red" />
 
 
 

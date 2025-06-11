@@ -1,5 +1,9 @@
 package si.uni_lj.fe.tnuv.flatypus.ui.home;
 
+import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
@@ -11,15 +15,18 @@ import si.uni_lj.fe.tnuv.flatypus.ui.expenses.ExpensesViewModel;
 import si.uni_lj.fe.tnuv.flatypus.ui.opening.UserViewModel;
 import si.uni_lj.fe.tnuv.flatypus.ui.shoppinglist.ShoppingListViewModel;
 import si.uni_lj.fe.tnuv.flatypus.ui.to_do.ToDoViewModel;
+import si.uni_lj.fe.tnuv.flatypus.widget.WidgetProvider;
 
 public class HomeViewModel extends ViewModel {
-
-    private final MutableLiveData<Integer> heartCount = new MutableLiveData<>();
+    public static final String ACTION_HEART_COUNT_UPDATED = WidgetProvider.ACTION_HEART_COUNT_UPDATED;
+    private static final MutableLiveData<Integer> heartCount = new MutableLiveData<>();
     private final MutableLiveData<Integer> mNotificationCount = new MutableLiveData<>(0);
 
     private final MutableLiveData<Integer> shoppingItemCount = new MutableLiveData<>(0); // To store shopping count
     private final MutableLiveData<Integer> incompleteTaskCount = new MutableLiveData<>(0); // To store task count
     private final MutableLiveData<Float> owedExpenseSum = new MutableLiveData<>(0f);
+    private Context context;
+
     public HomeViewModel() {
         heartCount.setValue(5); // Default value
         mNotificationCount.setValue(0);
@@ -42,16 +49,53 @@ public class HomeViewModel extends ViewModel {
         return null;
     }
 
-    // Methods to update the state
+    // Static method to get the current heart count
+    public static int getCurrentHeartCount() {
+        Integer value = heartCount.getValue();
+        return value != null ? value : 0;
+    }
+
     public void updateHeartCount(int newCount) {
         heartCount.setValue(newCount);
+        if (context != null) {
+            Log.d("HomeViewModel", "Broadcasting heartCount: " + newCount + ", Context: " + context);
+            Intent intent = new Intent(ACTION_HEART_COUNT_UPDATED);
+            intent.putExtra("heartCount", newCount);
+            context.getApplicationContext().sendBroadcast(intent); // Use application context
+            // Fallback: Force widget update
+            WidgetProvider.updateWidgets(context.getApplicationContext());
+        } else {
+            Log.d("HomeViewModel", "No context available, broadcast not sent");
+        }
     }
 
     // Initialize heart calculation with user and shopping data
 // Initialize heart calculation with user, shopping, and task data
 // Initialize heart calculation with user, shopping, and task data
 
-
+    public void initHeartCalculation(Context context, UserViewModel userViewModel, ShoppingListViewModel shoppingViewModel,
+                                     ToDoViewModel toDoViewModel, ExpensesViewModel expensesViewModel) {
+        this.context = context; // Store the context
+        userViewModel.getCurrentUser().observeForever(new Observer<UserViewModel.User>() {
+            @Override
+            public void onChanged(UserViewModel.User user) {
+                if (user != null) {
+                    String currentApartment = user.getCurrentApartment();
+                    String currentUserEmail = user.getEmail();
+                    if (currentApartment != null && !currentApartment.isEmpty()) {
+                        toDoViewModel.fetchTasks(currentApartment);
+                        observeShoppingItems(shoppingViewModel, currentApartment);
+                        observeTasks(toDoViewModel, currentUserEmail, currentApartment);
+                        observeOwedExpenses(expensesViewModel, currentApartment, currentUserEmail);
+                    } else {
+                        calculateHeartCount(0, 0f, 0);
+                    }
+                } else {
+                    calculateHeartCount(0, 0f, 0);
+                }
+            }
+        });
+    }
     // Function to observe and return the number of shopping items
     void observeShoppingItems(ShoppingListViewModel shoppingViewModel, String currentApartment) {
         shoppingViewModel.getShoppingItems(currentApartment).observeForever(new Observer<List<ShoppingListViewModel.ShoppingItem>>() {
@@ -121,6 +165,8 @@ public class HomeViewModel extends ViewModel {
             hearts -= 2;
         }
 
-        heartCount.setValue(Math.max(0, hearts)); // Ensure non-negative hearts
+        int finalHearts = Math.max(0, hearts);
+        //heartCount.setValue(finalHearts);
+        updateHeartCount(finalHearts); // Use stored context
     }
 }
