@@ -106,10 +106,6 @@ public class SettingsFragment extends Fragment {
         notificationsToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
             // Handle notifications toggle (implement your logic here)
             viewModel.toggleNotifications(isChecked);
-            new AlertDialog.Builder(requireContext())
-                    .setMessage("Notifications " + (isChecked ? "on" : "off"))
-                    .setPositiveButton("OK", (d2, which) -> d2.dismiss())
-                    .show();
         });
 
         // Apartments Button
