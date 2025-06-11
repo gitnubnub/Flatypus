@@ -4,14 +4,15 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="8dp"
-    android:background="?attr/selectableItemBackground">
+    android:background="@color/wheat">
 
     <TextView
         android:id="@+id/apartment_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="18sp"
-        android:textColor="#4A2C2A"
+        android:textColor="@color/dark_red"
+        android:padding="5dp"
         android:textStyle="bold" />
 
 

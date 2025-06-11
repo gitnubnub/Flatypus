@@ -9,9 +9,9 @@
         android:id="@+id/username_edit_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter new username"
+        android:hint="@string/enter_new_username"
         android:padding="8dp"
-        android:textColor="#4A2C2A"
+        android:textColor="@color/dark_red"
         android:textSize="16sp" />
 
 </LinearLayout>

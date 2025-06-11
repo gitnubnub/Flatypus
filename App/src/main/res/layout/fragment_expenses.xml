@@ -7,11 +7,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/wheat">
 
+    <View
+        android:id="@+id/green_arch"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:background="@drawable/green_arch"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <TextView
         android:id="@+id/header_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="SETTLE UP!"
+        android:text="@string/settle_up"
         android:textColor="@color/dark_red"
         android:textSize="24sp"
         android:gravity="center"
@@ -33,7 +42,7 @@
         android:id="@+id/divider"
         android:layout_width="0dp"
         android:layout_height="5dp"
-        android:background="@color/lion"
+        android:background="#0000"
         app:layout_constraintTop_toBottomOf="@id/expenses_container_1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

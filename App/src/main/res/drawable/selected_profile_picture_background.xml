@@ -5,4 +5,5 @@
         android:width="2dp"
         android:color="#4CAF50" /> <!-- Green border for selected item -->
     <corners android:radius="8dp" />
+    <solid android:color="@color/wheat" /> <!-- White background for selected item -->
 </shape>

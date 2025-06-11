@@ -11,7 +11,9 @@
         android:layout_height="wrap_content"
         android:divider="@android:color/transparent"
         android:dividerHeight="8dp"
-        android:padding="8dp" />
+        android:padding="8dp"
+        android:background="@color/wheat"
+        android:textColor="@color/dark_red"/>
 
     <Button
         android:id="@+id/add_apartment_button"
@@ -19,8 +21,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:background="@drawable/button_background"
-        android:text="Add Apartment"
-        android:textColor="#4A2C2A" />
+        android:text="@string/add_apartment"
+        android:textColor="@color/white"
+        android:textStyle="bold"/>
 
     <Button
         android:id="@+id/create_apartment_button"
@@ -28,6 +31,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:background="@drawable/button_background"
-        android:text="Create Apartment"
-        android:textColor="#4A2C2A" />
+        android:text="@string/create_apartment"
+        android:textColor="@color/white"
+        android:textStyle="bold"/>
 </LinearLayout>

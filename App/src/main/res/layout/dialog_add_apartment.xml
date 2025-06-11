@@ -9,9 +9,10 @@
         android:id="@+id/apartment_code_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter apartment code"
+        android:hint="@string/enter_apartment_code"
         android:padding="8dp"
-        android:textColor="#4A2C2A"
+        android:textColor="@color/dark_red"
+        android:background="@color/wheat"
         android:textSize="16sp" />
 
 </LinearLayout>

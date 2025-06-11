@@ -25,13 +25,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="To-Do List"
-        android:textColor="#FFFFFF"
+        android:text="@string/to_do_list"
+        android:textColor="@color/dark_red"
         android:textSize="24sp"
-        android:textStyle="bold"
+        android:gravity="center"
         app:layout_constraintEnd_toEndOf="@id/green_arch"
         app:layout_constraintStart_toStartOf="@id/green_arch"
-        app:layout_constraintTop_toTopOf="@id/green_arch" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
         android:id="@+id/todo_list_container"

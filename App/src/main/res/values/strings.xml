@@ -30,4 +30,18 @@
     <string name="title_expenses">Expenses</string>
     <string name="title_chat">Chat</string>
     <string name="heart_count">0</string>
+    <string name="pick_these_up_if_you_can">PICK THESE UP IF YOU CAN!</string>
+    <string name="settle_up">SETTLE UP!</string>
+    <string name="to_do_list">TO DO LIST</string>
+    <string name="settle">Settle</string>
+    <string name="enter_new_username">Enter new username</string>
+    <string name="enter_apartment_name">Enter apartment name</string>
+    <string name="add_apartment">Add Apartment</string>
+    <string name="create_apartment">Create Apartment</string>
+    <string name="enter_apartment_code">Enter apartment code</string>
+    <string name="task_name">Task Name</string>
+    <string name="add_task">ADD TASK</string>
+    <string name="task_name_tasks">Task Name</string>
+    <string name="username">Username</string>
+    <string name="log_out">LOG OUT</string>
 </resources>

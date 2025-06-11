@@ -6,11 +6,21 @@
     android:layout_height="match_parent"
     android:background="@color/wheat">
 
+    <!-- Green Arch Background -->
+    <View
+        android:id="@+id/green_arch"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:background="@drawable/green_arch"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <TextView
         android:id="@+id/header_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="PICK THESE UP IF YOU CAN!"
+        android:text="@string/pick_these_up_if_you_can"
         android:textColor="@color/dark_red"
         android:textSize="24sp"
         android:gravity="center"
