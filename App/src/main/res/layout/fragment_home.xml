@@ -52,7 +52,7 @@
             android:layout_height="29dp"
             android:background="@drawable/red_circle"
             android:gravity="center"
-            android:text="@string/notification_count"
+            android:text=""
             android:textColor="#FFFFFF"
             android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="@id/notification_icon"

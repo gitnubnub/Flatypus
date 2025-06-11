@@ -5,6 +5,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
 import com.google.firebase.database.DataSnapshot;
@@ -60,7 +61,17 @@ public class NotificationsViewModel extends ViewModel {
     }
 
     private final MutableLiveData<List<Notification>> notifications = new MutableLiveData<>(new ArrayList<>());
-    private final MutableLiveData<Integer> unseen = new MutableLiveData<>(0);
+    private final LiveData<Integer> unseen = Transformations.map(notifications, list -> {
+        int counter = 0;
+        if (list != null) {
+            for (Notification notif : list) {
+                if (!notif.isSeen()) {
+                    counter++;
+                }
+            }
+        }
+        return counter;
+    });
     private DatabaseReference databaseReference;
 
     public NotificationsViewModel() {
@@ -69,17 +80,7 @@ public class NotificationsViewModel extends ViewModel {
     }
 
     public LiveData<Integer> unseen() {
-        List<Notification> currentNotifications = notifications.getValue();
-
-        int counter = 0;
-        for (Notification notif : currentNotifications) {
-            if (!notif.isSeen()) {
-                counter++;
-            }
-        }
-
-        unseen.setValue(counter);
-        return unseen;
+        return unseen; // Return the reactive LiveData
     }
 
     public LiveData<List<Notification>> getNotifications(String apartment, String user) {
