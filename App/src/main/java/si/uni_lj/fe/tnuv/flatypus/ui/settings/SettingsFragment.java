@@ -40,6 +40,7 @@ import si.uni_lj.fe.tnuv.flatypus.data.Chat;
 import si.uni_lj.fe.tnuv.flatypus.data.Expense;
 import si.uni_lj.fe.tnuv.flatypus.data.Task;
 import si.uni_lj.fe.tnuv.flatypus.databinding.FragmentSettingsBinding;
+import si.uni_lj.fe.tnuv.flatypus.ui.notifications.NotificationsViewModel;
 import si.uni_lj.fe.tnuv.flatypus.ui.opening.UserViewModel;
 
 public class SettingsFragment extends Fragment {
@@ -47,6 +48,7 @@ public class SettingsFragment extends Fragment {
     private DatabaseReference databaseReference;
     private FragmentSettingsBinding binding;
     private UserViewModel viewModel;
+    private NotificationsViewModel notifViewModel;
     private String currentUsername = "Eva"; // Pull from database Default username (replace with dynamic source if needed)
     private String currentApartmentCode = "XDSYI"; // Pull from database Default apartment code (replace with dynamic source if needed)
 
@@ -68,6 +70,7 @@ public class SettingsFragment extends Fragment {
         binding = FragmentSettingsBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+        notifViewModel = new ViewModelProvider(requireActivity()).get(NotificationsViewModel.class);
         viewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
         viewModel.getCurrentUser().observe(getViewLifecycleOwner(), new Observer<UserViewModel.User>() {
             @Override
@@ -331,7 +334,7 @@ public class SettingsFragment extends Fragment {
                                 .show();
                         return;
                     }
-                    viewModel.fetchApartment(code);
+                    viewModel.fetchApartment(code, notifViewModel);
                     adapter.notifyDataSetChanged();
                     currentApartmentCode = code; // Update current apartment code
                     binding.apartmentCode.setText(currentApartmentCode);

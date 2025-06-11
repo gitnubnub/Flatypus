@@ -48,7 +48,7 @@ public class ApartmentSelectionFragment extends Fragment {
                 return;
             }
 
-            viewModel.fetchApartment(apartmentCode);
+            viewModel.fetchApartment(apartmentCode, notifViewModel);
 
             viewModel.getRoommates(apartmentCode).observe(getViewLifecycleOwner(), roommates -> {
                 if (roommates != null && !roommates.isEmpty()) {

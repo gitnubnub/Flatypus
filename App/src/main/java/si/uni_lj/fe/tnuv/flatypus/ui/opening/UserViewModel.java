@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import si.uni_lj.fe.tnuv.flatypus.ui.notifications.NotificationsViewModel;
+
 public class UserViewModel extends ViewModel {
 
     public static class User {
@@ -294,7 +296,7 @@ public class UserViewModel extends ViewModel {
         }
     }
 
-    public void fetchApartment(String apartmentCode) {
+    public void fetchApartment(String apartmentCode, NotificationsViewModel notifViewModel) {
         User current = currentUser.getValue();
         if (current != null) {
             apartmentsReference.orderByChild("code").equalTo(apartmentCode)
@@ -321,6 +323,15 @@ public class UserViewModel extends ViewModel {
                                                                         userData.getRef().child("currentApartment").setValue(apartmentCode)
                                                                                 .addOnSuccessListener(aVoid2 -> {
                                                                                     apartmentFetchResult.setValue(apartmentCode); // Signal success
+
+                                                                                    getRoommates(apartmentCode).observeForever(roommates -> {
+                                                                                        for (User roommate : roommates) {
+                                                                                            if (!roommate.getEmail().equals(current.getEmail())) {
+                                                                                                notifViewModel.addNotification(apartmentCode, roommate.getEmail(),
+                                                                                                        "A new flatypus joined your apartment!");
+                                                                                            }
+                                                                                        }
+                                                                                    });
                                                                                 })
                                                                                 .addOnFailureListener(e -> apartmentFetchResult.setValue(null));
                                                                     })

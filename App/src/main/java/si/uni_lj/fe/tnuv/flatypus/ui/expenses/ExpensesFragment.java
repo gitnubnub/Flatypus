@@ -200,7 +200,7 @@ public class ExpensesFragment extends Fragment {
 
             for (UserViewModel.User roommate : chosenRoommates) {
                 viewModel.addExpense(currentApartmentCode, amount / (chosenRoommates.size() + 1), roommate.getEmail(), currentUser);
-                notifViewModel.addNotification(currentApartmentCode, roommate.getEmail(), "New expense for you: " + amount / (chosenRoommates.size() + 1) + " €");
+                notifViewModel.addNotification(currentApartmentCode, roommate.getEmail(), "New expense for you: " + String.format("%.2f", amount / (chosenRoommates.size() + 1)) + " €");
             }
 
             if (chosenRoommates.isEmpty()) {
