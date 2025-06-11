@@ -73,11 +73,29 @@ public class HomeFragment extends Fragment {
 
         // Notification Count
         TextView notificationCount = binding.notificationCount;
-        notifViewModel.unseen().observe(getViewLifecycleOwner(), count -> {
-            notificationCount.setText(count > 99 ? "99+" : String.valueOf(count));
+        userViewModel.getCurrentUser().observe(getViewLifecycleOwner(), user -> {
+            if (user != null) {
+                String apartment = user.getCurrentApartment();
+                String userEmail = user.getEmail();
+                if (apartment != null && !apartment.isEmpty() && userEmail != null) {
+                    // Fetch notifications to populate the data
+                    notifViewModel.getNotifications(apartment, userEmail);
+                    // Observe the unseen count
+                    notifViewModel.unseen().observe(getViewLifecycleOwner(), count -> {
+                        Log.d("HomeFragment", "Unseen count updated to: " + count);
+                        notificationCount.setText(count > 99 ? "99+" : String.valueOf(count));
+                    });
+                } else {
+                    Log.w("HomeFragment", "Apartment or user email is null, defaulting notification count to 0");
+                    notificationCount.setText("0");
+                }
+            } else {
+                Log.w("HomeFragment", "User is null, defaulting notification count to 0");
+                notificationCount.setText("0");
+            }
         });
 
-// Platypus (Observe LiveData to handle null safely)
+        // Platypus (Observe LiveData to handle null safely)
         ImageView platypus = binding.characterImage;
         userViewModel.getCurrentUser().observe(getViewLifecycleOwner(), user -> {
             if (user != null) {
@@ -163,8 +181,6 @@ public class HomeFragment extends Fragment {
             layout.addView(heart);
         }
     }
-
-
 
     @Override
     public void onDestroyView() {
