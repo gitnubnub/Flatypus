@@ -38,7 +38,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="16dp"
-            android:text="ACTIVITY"
+            android:text="@string/activity"
             android:textColor="@color/dark_red"
             android:textSize="24sp"
             app:layout_constraintTop_toTopOf="parent"
@@ -65,12 +65,13 @@
             android:orientation="vertical">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="New notifications"
+                android:text="@string/new_notifications"
                 android:textColor="@color/dark_red"
                 android:textSize="25sp"
-                android:padding="8dp"/>
+                android:padding="8dp"
+                android:background="@color/wheat"/>
 
             <LinearLayout
                 android:id="@+id/new_notifications_container"
@@ -79,12 +80,13 @@
                 android:orientation="vertical" />
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Old notifications"
+                android:text="@string/old_notifications"
                 android:textColor="@color/dark_red"
                 android:textSize="25sp"
-                android:padding="8dp"/>
+                android:padding="8dp"
+                android:background="@color/lion" />
 
             <LinearLayout
                 android:id="@+id/old_notifications_container"

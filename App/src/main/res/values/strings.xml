@@ -44,4 +44,7 @@
     <string name="task_name_tasks">Task Name</string>
     <string name="username">Username</string>
     <string name="log_out">LOG OUT</string>
+    <string name="activity">ACTIVITY</string>
+    <string name="new_notifications">New notifications</string>
+    <string name="old_notifications">Old notifications</string>
 </resources>
