@@ -13,7 +13,7 @@
 android:id="@+id/assignee_profile_picture"
 android:layout_width="40dp"
 android:layout_height="40dp"
-android:src="@drawable/platypus"
+android:src="@drawable/platypus_red"
 app:layout_constraintStart_toStartOf="parent"
 app:layout_constraintTop_toTopOf="parent"
 app:layout_constraintBottom_toBottomOf="parent"

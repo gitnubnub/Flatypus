@@ -75,6 +75,28 @@ public class HomeFragment extends Fragment {
             notificationCount.setText(count > 99 ? "99+" : String.valueOf(count));
         });
 
+        // Platypus (Observe LiveData to handle null safely)
+        ImageView platypus = binding.characterImage;
+        userViewModel.getCurrentUser().observe(getViewLifecycleOwner(), user -> {
+            if (user != null) {
+                int currentPfp = user.getProfilePicture();
+                Log.d("Home Fragment: ", "Profile picture value: " + currentPfp);
+                if (currentPfp == R.drawable.pfp_red) {
+                    platypus.setImageResource(R.drawable.platypus_red);
+                } else if (currentPfp == R.drawable.pfp_green) {
+                    platypus.setImageResource(R.drawable.platypus_green);
+                } else if (currentPfp == R.drawable.pfp_purple) {
+                    platypus.setImageResource(R.drawable.platypus_purple);
+                } else {
+                    Log.w("Home Fragment: ", "Unknown profile picture value: " + currentPfp + ", defaulting to platypus_red");
+                    platypus.setImageResource(R.drawable.platypus_red);
+                }
+            } else {
+                Log.w("Home Fragment: ", "User is null, defaulting to platypus_red");
+                platypus.setImageResource(R.drawable.platypus_red);
+            }
+        });
+
         return root;
     }
 
