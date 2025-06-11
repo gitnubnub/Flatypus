@@ -20,6 +20,7 @@ import androidx.navigation.Navigation;
 import si.uni_lj.fe.tnuv.flatypus.R;
 import si.uni_lj.fe.tnuv.flatypus.databinding.FragmentHomeBinding;
 import si.uni_lj.fe.tnuv.flatypus.ui.expenses.ExpensesViewModel;
+import si.uni_lj.fe.tnuv.flatypus.ui.notifications.NotificationsViewModel;
 import si.uni_lj.fe.tnuv.flatypus.ui.opening.UserViewModel;
 import si.uni_lj.fe.tnuv.flatypus.ui.shoppinglist.ShoppingListViewModel;
 import si.uni_lj.fe.tnuv.flatypus.ui.to_do.ToDoViewModel;
@@ -36,6 +37,7 @@ public class HomeFragment extends Fragment {
         ShoppingListViewModel shoppingViewModel = new ViewModelProvider(requireActivity()).get(ShoppingListViewModel.class);
         ToDoViewModel toDoViewModel = new ViewModelProvider(this).get(ToDoViewModel.class);
         ExpensesViewModel expensesViewModel = new ViewModelProvider(this).get(ExpensesViewModel.class);
+        NotificationsViewModel notifViewModel = new ViewModelProvider(requireActivity()).get(NotificationsViewModel.class);
 
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
@@ -71,7 +73,7 @@ public class HomeFragment extends Fragment {
 
         // Notification Count
         TextView notificationCount = binding.notificationCount;
-        homeViewModel.getNotificationCount().observe(getViewLifecycleOwner(), count -> {
+        notifViewModel.unseen().observe(getViewLifecycleOwner(), count -> {
             notificationCount.setText(count > 99 ? "99+" : String.valueOf(count));
         });
 

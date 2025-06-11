@@ -20,6 +20,7 @@ import java.util.List;
 import si.uni_lj.fe.tnuv.flatypus.R;
 import si.uni_lj.fe.tnuv.flatypus.databinding.FragmentShoppingListBinding;
 import si.uni_lj.fe.tnuv.flatypus.ui.expenses.ExpensesViewModel;
+import si.uni_lj.fe.tnuv.flatypus.ui.notifications.NotificationsViewModel;
 import si.uni_lj.fe.tnuv.flatypus.ui.opening.UserViewModel;
 
 public class ShoppingListFragment extends Fragment {
@@ -28,6 +29,7 @@ public class ShoppingListFragment extends Fragment {
     private ShoppingListViewModel viewModel;
     private ExpensesViewModel expViewModel;
     private UserViewModel userViewModel;
+    private NotificationsViewModel notifViewModel;
     private String currentApartmentCode;
 
     @Override
@@ -35,6 +37,7 @@ public class ShoppingListFragment extends Fragment {
         viewModel = new ViewModelProvider(this).get(ShoppingListViewModel.class);
         expViewModel = new ViewModelProvider(requireActivity()).get(ExpensesViewModel.class);
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
+        notifViewModel = new ViewModelProvider(requireActivity()).get(NotificationsViewModel.class);
 
         binding = FragmentShoppingListBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
@@ -136,6 +139,14 @@ public class ShoppingListFragment extends Fragment {
 
             if (!itemName.isEmpty()) {
                 viewModel.addItem(itemName, currentApartmentCode);
+
+                userViewModel.getRoommates(currentApartmentCode).observe(getViewLifecycleOwner(), roommates -> {
+                    if (roommates != null && !roommates.isEmpty()) {
+                        for (UserViewModel.User roommate : roommates) {
+                            notifViewModel.addNotification(currentApartmentCode, roommate.getEmail(), "New item on the shopping list: " + itemName);
+                        }
+                    }
+                });
                 dialog.dismiss();
             } else {
                 itemNameInput.setError("Item name cannot be empty");

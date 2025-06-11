@@ -24,6 +24,7 @@ import java.util.List;
 
 import si.uni_lj.fe.tnuv.flatypus.R;
 import si.uni_lj.fe.tnuv.flatypus.databinding.FragmentToDoBinding;
+import si.uni_lj.fe.tnuv.flatypus.ui.notifications.NotificationsViewModel;
 import si.uni_lj.fe.tnuv.flatypus.ui.opening.UserViewModel;
 
 public class ToDoFragment extends Fragment {
@@ -31,14 +32,16 @@ public class ToDoFragment extends Fragment {
     private FragmentToDoBinding binding;
     private si.uni_lj.fe.tnuv.flatypus.ui.to_do.ToDoViewModel toDoViewModel;
     private UserViewModel userViewModel;
+    private NotificationsViewModel notifViewModel;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         toDoViewModel = new ViewModelProvider(this).get(ToDoViewModel.class);
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
+        notifViewModel = new ViewModelProvider(requireActivity()).get(NotificationsViewModel.class);
         binding = FragmentToDoBinding.inflate(inflater, container, false);
 
-        toDoViewModel.initializeWithUserViewModel(userViewModel);
+        toDoViewModel.initializeWithUserViewModel(userViewModel, notifViewModel);
         View root = binding.getRoot();
 
         LinearLayout todoListContainer = binding.todoListContainer;

@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Random;
 
 import si.uni_lj.fe.tnuv.flatypus.R;
+import si.uni_lj.fe.tnuv.flatypus.ui.notifications.NotificationsViewModel;
 import si.uni_lj.fe.tnuv.flatypus.ui.opening.UserViewModel;
 
 public class ToDoViewModel extends ViewModel {
@@ -58,13 +59,15 @@ public class ToDoViewModel extends ViewModel {
     private DatabaseReference databaseReference;
     private String currentApartmentCode = ""; // Will be set from UserViewModel
     private UserViewModel userViewModel;
+    private NotificationsViewModel notifViewModel;
 
     public ToDoViewModel() {
         FirebaseDatabase database = FirebaseDatabase.getInstance("https://flatypus-fde01-default-rtdb.europe-west1.firebasedatabase.app");
         databaseReference = database.getReference();
     }
 
-    public void initializeWithUserViewModel(UserViewModel userViewModel) {
+    public void initializeWithUserViewModel(UserViewModel userViewModel, NotificationsViewModel notifViewModel) {
+        this.notifViewModel = notifViewModel;
         this.userViewModel = userViewModel;
         userViewModel.getCurrentUser().observeForever(user -> {
             if (user != null) {
@@ -127,6 +130,7 @@ public class ToDoViewModel extends ViewModel {
                         if (user.getUsername().equals(randomUsername)) {
                             updatedAssigneeEmail[0] = user.getEmail();
                             addTaskToListAndDatabase(name, updatedAssigneeEmail[0], repeat);
+                            notifViewModel.addNotification(currentApartmentCode, updatedAssigneeEmail[0], "You have a new task: " + name);
                             break;
                         }
                     }

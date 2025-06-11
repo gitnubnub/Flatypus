@@ -11,16 +11,19 @@ import android.widget.EditText;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.security.SecureRandom;
 
 import si.uni_lj.fe.tnuv.flatypus.R;
 import si.uni_lj.fe.tnuv.flatypus.databinding.FragmentApartmentSelectionBinding;
+import si.uni_lj.fe.tnuv.flatypus.ui.notifications.NotificationsViewModel;
 
 public class ApartmentSelectionFragment extends Fragment {
 
     private FragmentApartmentSelectionBinding binding;
     private UserViewModel viewModel;
+    private NotificationsViewModel notifViewModel;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -28,6 +31,8 @@ public class ApartmentSelectionFragment extends Fragment {
         View root = binding.getRoot();
 
         viewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
+        notifViewModel = new ViewModelProvider(requireActivity()).get(NotificationsViewModel.class);
+
         binding.backButton.setOnClickListener(v -> requireActivity().onBackPressed());
 
         EditText apartmentCodeInput = binding.apartmentCodeInput;
@@ -44,6 +49,14 @@ public class ApartmentSelectionFragment extends Fragment {
             }
 
             viewModel.fetchApartment(apartmentCode);
+
+            viewModel.getRoommates(apartmentCode).observe(getViewLifecycleOwner(), roommates -> {
+                if (roommates != null && !roommates.isEmpty()) {
+                    for (UserViewModel.User roommate : roommates) {
+                        notifViewModel.addNotification(apartmentCode, roommate.getEmail(), "A new flatypus joined your apartment!");
+                    }
+                }
+            });
         });
 
         binding.createApartmentButton.setOnClickListener(v -> showCreateApartmentDialog());

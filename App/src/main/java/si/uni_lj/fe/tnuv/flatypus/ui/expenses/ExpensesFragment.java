@@ -26,6 +26,7 @@ import java.util.List;
 
 import si.uni_lj.fe.tnuv.flatypus.R;
 import si.uni_lj.fe.tnuv.flatypus.databinding.FragmentExpensesBinding;
+import si.uni_lj.fe.tnuv.flatypus.ui.notifications.NotificationsViewModel;
 import si.uni_lj.fe.tnuv.flatypus.ui.opening.UserViewModel;
 
 public class ExpensesFragment extends Fragment {
@@ -33,6 +34,7 @@ public class ExpensesFragment extends Fragment {
     private FragmentExpensesBinding binding;
     private ExpensesViewModel viewModel;
     private UserViewModel userViewModel;
+    private NotificationsViewModel notifViewModel;
     private String currentUser;
     private String currentApartmentCode;
 
@@ -43,6 +45,7 @@ public class ExpensesFragment extends Fragment {
 
         viewModel = new ViewModelProvider(requireActivity()).get(ExpensesViewModel.class);
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
+        notifViewModel = new ViewModelProvider(requireActivity()).get(NotificationsViewModel.class);
 
         userViewModel.getCurrentUser().observe(getViewLifecycleOwner(), user -> {
             if (user != null) {
@@ -197,6 +200,7 @@ public class ExpensesFragment extends Fragment {
 
             for (UserViewModel.User roommate : chosenRoommates) {
                 viewModel.addExpense(currentApartmentCode, amount / (chosenRoommates.size() + 1), roommate.getEmail(), currentUser);
+                notifViewModel.addNotification(currentApartmentCode, roommate.getEmail(), "New expense for you: " + amount / (chosenRoommates.size() + 1) + " €");
             }
 
             if (chosenRoommates.isEmpty()) {

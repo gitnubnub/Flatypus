@@ -28,6 +28,7 @@ import java.util.Map;
 
 import si.uni_lj.fe.tnuv.flatypus.R;
 import si.uni_lj.fe.tnuv.flatypus.databinding.FragmentChatBinding;
+import si.uni_lj.fe.tnuv.flatypus.ui.notifications.NotificationsViewModel;
 import si.uni_lj.fe.tnuv.flatypus.ui.opening.UserViewModel;
 
 public class ChatFragment extends Fragment {
@@ -35,12 +36,14 @@ public class ChatFragment extends Fragment {
     private FragmentChatBinding binding;
     private ChatViewModel viewModel;
     private UserViewModel userViewModel;
+    private NotificationsViewModel notifViewModel;
     private String currentUser;
     private String currentApartmentCode;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         viewModel = new ViewModelProvider(this).get(ChatViewModel.class);
         userViewModel = new ViewModelProvider(requireActivity()).get(UserViewModel.class);
+        notifViewModel = new ViewModelProvider(requireActivity()).get(NotificationsViewModel.class);
 
         binding = FragmentChatBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
@@ -129,6 +132,16 @@ public class ChatFragment extends Fragment {
 
                     viewModel.addChat(currentApartmentCode, messageText, currentUser);
                     messageInput.setText(""); // Clear input after sending
+
+                    userViewModel.getRoommates(currentApartmentCode).observe(getViewLifecycleOwner(), roommates -> {
+                        if (roommates != null && !roommates.isEmpty()) {
+                            for (UserViewModel.User roommate : roommates) {
+                                if (!user.getEmail().equals(roommate.getEmail())) {
+                                    notifViewModel.addNotification(currentApartmentCode, roommate.getEmail(), "You got a new message from " + user.getUsername() + ".");
+                                }
+                            }
+                        }
+                    });
                 });
             }
         });
